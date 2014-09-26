@@ -1,4 +1,4 @@
-class TestRecords < ActiveRecord::Migration
+class PolymorphicTables < ActiveRecord::Migration
   def change
     create_table :employees do |t|
       t.string :name
@@ -15,5 +15,7 @@ class TestRecords < ActiveRecord::Migration
       t.references :imageable, polymorphic: true
       t.timestamps
     end
+
+    add_polymorphic_constraints :imageable, :picture
   end
 end

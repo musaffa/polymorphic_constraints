@@ -3,7 +3,7 @@ ENV['RAILS_ENV'] ||= 'test'
 require_relative 'dummy/config/environment'
 require 'rspec/rails'
 require 'pg'
-require_relative 'dummy/db/migrate/1_test_records'
+require_relative 'dummy/db/migrate/polymorphic_tables'
 require_relative '../lib/polymorphic_constraints'
 
 # ActiveRecord::Migration.maintain_test_schema!
@@ -54,7 +54,7 @@ def connect_db
 end
 
 def migrate_db
-  TestRecords.new.change
+  PolymorphicTables.new.change
 end
 
 def drop_tables

@@ -1,8 +1,40 @@
-module PolymorphicConstraints
-  module Adapters
-    class Postgresql
+require 'active_support/inflector'
 
-      def self.generate_input_constraints(relation, associated_model, polymorphic_models)
+module PolymorphicConstraints
+  module ConnectionAdapters
+    module PostgresqlAdapter
+      def supports_polymorphic_constraints?
+        true
+      end
+
+      def add_polymorphic_constraints(relation, associated_model, options = {})
+        polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation) }.map(&:to_s)
+        triggers = []
+        triggers << generate_input_constraints(relation, associated_model, polymorphic_models)
+        triggers << generate_delete_constraints(relation, associated_model, polymorphic_models)
+
+        triggers.each { |trigger| execute trigger }
+      end
+
+      def remove_polymorphic_constraints(relation)
+        triggers = []
+        triggers << drop_constraints(relation)
+
+        triggers.each { |trigger| execute trigger }
+      end
+
+      private
+
+      def get_polymorphic_models(relation)
+        Rails.application.eager_load!
+        ActiveRecord::Base.descendants.select do |klass|
+          associations = klass.reflect_on_all_associations
+          associations.map{ |r| r.options[:as] }.include?(relation.to_sym)
+        end
+      end
+
+      def generate_input_constraints(relation, associated_model, polymorphic_models)
+        associated_model = associated_model.to_s
         sql = "DROP FUNCTION IF EXISTS check_#{relation}_create_integrity()
                CASCADE;"
 
@@ -44,7 +76,8 @@ module PolymorphicConstraints
         sql
       end
 
-      def self.generate_delete_constraints(relation, associated_model, polymorphic_models)
+      def generate_delete_constraints(relation, associated_model, polymorphic_models)
+        associated_model = associated_model.to_s
         associated_model_table_name = associated_model.classify.constantize.table_name
 
         sql = "DROP FUNCTION IF EXISTS check_#{relation}_delete_integrity()
@@ -99,7 +132,7 @@ module PolymorphicConstraints
         sql
       end
 
-      def self.drop_constraints(relation)
+      def drop_constraints(relation)
         sql = %{
           DROP FUNCTION IF EXISTS check_#{relation}_create_integrity()
           CASCADE;
@@ -110,5 +143,11 @@ module PolymorphicConstraints
         sql
       end
     end
+  end
+end
+
+ActiveRecord::ConnectionAdapters.const_get(:PostgreSQLAdapter).class_eval do
+  unless ancestors.include? PolymorphicConstraints::ConnectionAdapters::PostgresqlAdapter
+    include PolymorphicConstraints::ConnectionAdapters::PostgresqlAdapter
   end
 end

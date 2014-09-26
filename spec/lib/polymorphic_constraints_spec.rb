@@ -2,29 +2,7 @@ require 'spec_helper'
 
 describe PolymorphicConstraints do
 
-  before do
-    class Employee < ActiveRecord::Base
-      has_many :pictures, as: :imageable
-    end
-
-    class Product < ActiveRecord::Base
-      has_many :pictures, as: :imageable
-    end
-
-    class Picture < ActiveRecord::Base
-      belongs_to :imageable, polymorphic: true
-    end
-
-    class DummyMigration < ActiveRecord::Migration
-      def change
-      end
-    end
-  end
-
-  subject { DummyMigration.new }
-
-  it { is_expected.to respond_to :add_polymorphic_constraints }
-  it { is_expected.to respond_to :remove_polymorphic_constraints }
+  subject { PolymorphicTables.new }
 
   describe 'add_polymorphic_constraints' do
     it 'requires relation and associated model' do
