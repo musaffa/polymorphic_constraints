@@ -1,14 +1,17 @@
 require 'active_support/inflector'
+require_relative 'utils/sql_string'
 
 module PolymorphicConstraints
   module ConnectionAdapters
     module PostgreSQLAdapter
+      include SqlString
+
       def supports_polymorphic_constraints?
         true
       end
 
       def add_polymorphic_constraints(relation, associated_table, options = {})
-        polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation) }.map(&:to_s)
+        polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation) }
         triggers = []
         triggers << generate_input_constraints(relation, associated_table, polymorphic_models)
         triggers << generate_delete_constraints(relation, associated_table, polymorphic_models)
@@ -35,14 +38,16 @@ module PolymorphicConstraints
 
       def generate_input_constraints(relation, associated_table, polymorphic_models)
         associated_table = associated_table.to_s
+        polymorphic_models = polymorphic_models.map(&:to_s)
+
         sql = "DROP FUNCTION IF EXISTS check_#{relation}_create_integrity()
-               CASCADE;"
+                 CASCADE;"
 
         sql << %{
           CREATE FUNCTION check_#{relation}_create_integrity()
           RETURNS TRIGGER AS '
             BEGIN
-              IF NEW.#{relation}_type = ''#{polymorphic_models[0]}'' AND EXISTS (
+              IF NEW.#{relation}_type = ''#{polymorphic_models[0].classify}'' AND EXISTS (
                   SELECT id FROM #{polymorphic_models[0].classify.constantize.table_name}
                   WHERE id = NEW.#{relation}_id) THEN
 
@@ -51,7 +56,7 @@ module PolymorphicConstraints
 
         polymorphic_models[1..-1].each do |polymorphic_model|
           sql << %{
-            ELSEIF NEW.#{relation}_type = ''#{polymorphic_model}'' AND EXISTS (
+            ELSEIF NEW.#{relation}_type = ''#{polymorphic_model.classify}'' AND EXISTS (
                 SELECT id FROM #{polymorphic_model.classify.constantize.table_name}
                 WHERE id = NEW.#{relation}_id) THEN
 
@@ -73,14 +78,15 @@ module PolymorphicConstraints
           EXECUTE PROCEDURE check_#{relation}_create_integrity();
         }
 
-        sql
+        strip_non_essential_spaces(sql)
       end
 
       def generate_delete_constraints(relation, associated_table, polymorphic_models)
         associated_table = associated_table.to_s
+        polymorphic_models = polymorphic_models.map(&:to_s)
 
         sql = "DROP FUNCTION IF EXISTS check_#{relation}_delete_integrity()
-               CASCADE;"
+                 CASCADE;"
         sql << %{
           CREATE FUNCTION check_#{relation}_delete_integrity()
           RETURNS TRIGGER AS '
@@ -88,7 +94,7 @@ module PolymorphicConstraints
               IF TG_TABLE_NAME = ''#{polymorphic_models[0].classify.constantize.table_name}'' AND
               EXISTS (
                   SELECT id FROM #{associated_table}
-                  WHERE #{relation}_type = ''#{polymorphic_models[0]}''
+                  WHERE #{relation}_type = ''#{polymorphic_models[0].classify}''
                   AND #{relation}_id = OLD.id) THEN
 
                 RAISE EXCEPTION ''There are records in #{associated_table} that refer to the
@@ -101,7 +107,7 @@ module PolymorphicConstraints
             ELSEIF TG_TABLE_NAME = ''#{polymorphic_model.classify.constantize.table_name}'' AND
             EXISTS (
                 SELECT id FROM #{associated_table}
-                WHERE #{relation}_type = ''#{polymorphic_model}''
+                WHERE #{relation}_type = ''#{polymorphic_model.classify}''
                 AND #{relation}_id = OLD.id) THEN
 
               RAISE EXCEPTION ''There are records in #{associated_table} that refer to the
@@ -128,18 +134,18 @@ module PolymorphicConstraints
           }
         end
 
-        sql
+        strip_non_essential_spaces(sql)
       end
 
       def drop_constraints(relation)
         sql = %{
           DROP FUNCTION IF EXISTS check_#{relation}_create_integrity()
-          CASCADE;
+            CASCADE;
           DROP FUNCTION IF EXISTS check_#{relation}_delete_integrity()
-          CASCADE;
+            CASCADE;
         }
 
-        sql
+        strip_non_essential_spaces(sql)
       end
     end
   end
