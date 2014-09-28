@@ -8,6 +8,7 @@ require_relative '../lib/polymorphic_constraints'
 
 # ActiveRecord::Migration.maintain_test_schema!
 ActiveRecord::Migration.verbose = false
+Dir[File.join(File.dirname(__FILE__), 'support/**/*.rb')].each { |f| require f }
 
 RSpec.configure do |config|
   # config.use_transactional_fixtures = true

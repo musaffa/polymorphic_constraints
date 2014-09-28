@@ -1,10 +1,10 @@
 require 'active_support/inflector'
-require_relative 'utils/sql_string'
+require_relative '../utils/sql_string'
 
 module PolymorphicConstraints
   module ConnectionAdapters
     module PostgreSQLAdapter
-      include SqlString
+      include PolymorphicConstraints::Utils::SqlString
 
       def supports_polymorphic_constraints?
         true
