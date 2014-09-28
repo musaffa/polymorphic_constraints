@@ -6,11 +6,11 @@ describe PolymorphicConstraints do
 
   describe 'add_polymorphic_constraints' do
     it 'requires relation and associated model' do
-      expect{ subject.add_polymorphic_constraints(:imageable, :picture) }.not_to raise_error
+      expect{ subject.add_polymorphic_constraints(:imageable, :pictures) }.not_to raise_error
     end
 
     it 'accepts optional hash' do
-      expect{ subject.add_polymorphic_constraints(:imageable, :picture, polymorphic_models: [:product]) }.not_to raise_error
+      expect{ subject.add_polymorphic_constraints(:imageable, :pictures, polymorphic_models: [:product]) }.not_to raise_error
     end
   end
 

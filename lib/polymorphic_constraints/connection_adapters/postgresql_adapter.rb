@@ -2,16 +2,16 @@ require 'active_support/inflector'
 
 module PolymorphicConstraints
   module ConnectionAdapters
-    module PostgresqlAdapter
+    module PostgreSQLAdapter
       def supports_polymorphic_constraints?
         true
       end
 
-      def add_polymorphic_constraints(relation, associated_model, options = {})
+      def add_polymorphic_constraints(relation, associated_table, options = {})
         polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation) }.map(&:to_s)
         triggers = []
-        triggers << generate_input_constraints(relation, associated_model, polymorphic_models)
-        triggers << generate_delete_constraints(relation, associated_model, polymorphic_models)
+        triggers << generate_input_constraints(relation, associated_table, polymorphic_models)
+        triggers << generate_delete_constraints(relation, associated_table, polymorphic_models)
 
         triggers.each { |trigger| execute trigger }
       end
@@ -33,8 +33,8 @@ module PolymorphicConstraints
         end
       end
 
-      def generate_input_constraints(relation, associated_model, polymorphic_models)
-        associated_model = associated_model.to_s
+      def generate_input_constraints(relation, associated_table, polymorphic_models)
+        associated_table = associated_table.to_s
         sql = "DROP FUNCTION IF EXISTS check_#{relation}_create_integrity()
                CASCADE;"
 
@@ -68,7 +68,7 @@ module PolymorphicConstraints
           LANGUAGE plpgsql;
 
           CREATE TRIGGER check_#{relation}_create_integrity_trigger
-          BEFORE INSERT OR UPDATE ON #{associated_model.classify.constantize.table_name}
+          BEFORE INSERT OR UPDATE ON #{associated_table}
           FOR EACH ROW
           EXECUTE PROCEDURE check_#{relation}_create_integrity();
         }
@@ -76,9 +76,8 @@ module PolymorphicConstraints
         sql
       end
 
-      def generate_delete_constraints(relation, associated_model, polymorphic_models)
-        associated_model = associated_model.to_s
-        associated_model_table_name = associated_model.classify.constantize.table_name
+      def generate_delete_constraints(relation, associated_table, polymorphic_models)
+        associated_table = associated_table.to_s
 
         sql = "DROP FUNCTION IF EXISTS check_#{relation}_delete_integrity()
                CASCADE;"
@@ -88,11 +87,11 @@ module PolymorphicConstraints
             BEGIN
               IF TG_TABLE_NAME = ''#{polymorphic_models[0].classify.constantize.table_name}'' AND
               EXISTS (
-                  SELECT id FROM #{associated_model_table_name}
+                  SELECT id FROM #{associated_table}
                   WHERE #{relation}_type = ''#{polymorphic_models[0]}''
                   AND #{relation}_id = OLD.id) THEN
 
-                RAISE EXCEPTION ''There are records in #{associated_model_table_name} that refer to the
+                RAISE EXCEPTION ''There are records in #{associated_table} that refer to the
                 table % with id %. You must delete those records first.'', TG_TABLE_NAME, OLD.id;
                 RETURN NULL;
         }
@@ -101,11 +100,11 @@ module PolymorphicConstraints
           sql << %{
             ELSEIF TG_TABLE_NAME = ''#{polymorphic_model.classify.constantize.table_name}'' AND
             EXISTS (
-                SELECT id FROM #{associated_model_table_name}
+                SELECT id FROM #{associated_table}
                 WHERE #{relation}_type = ''#{polymorphic_model}''
                 AND #{relation}_id = OLD.id) THEN
 
-              RAISE EXCEPTION ''There are records in #{associated_model_table_name} that refer to the
+              RAISE EXCEPTION ''There are records in #{associated_table} that refer to the
               table % with id %. You must delete those records first.'', TG_TABLE_NAME, OLD.id;
               RETURN NULL;
           }
@@ -146,8 +145,4 @@ module PolymorphicConstraints
   end
 end
 
-ActiveRecord::ConnectionAdapters.const_get(:PostgreSQLAdapter).class_eval do
-  unless ancestors.include? PolymorphicConstraints::ConnectionAdapters::PostgresqlAdapter
-    include PolymorphicConstraints::ConnectionAdapters::PostgresqlAdapter
-  end
-end
+PolymorphicConstraints::Adapter.safe_include :PostgreSQLAdapter, PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter
