@@ -4,6 +4,7 @@ module PolymorphicConstraints
       ActiveSupport.on_load :active_record do
         ActiveRecord::ConnectionAdapters.module_eval do
           include PolymorphicConstraints::ConnectionAdapters::SchemaStatements
+          include PolymorphicConstraints::ConnectionAdapters::SchemaDefinitions
         end
 
         if defined?(ActiveRecord::Migration::CommandRecorder)
@@ -12,7 +13,7 @@ module PolymorphicConstraints
           end
         end
 
-        require 'polymorphic_constraints/connection_adapters/postgresql_adapter'
+        PolymorphicConstraints::Adapter.load!
       end
     end
   end
