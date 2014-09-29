@@ -12,18 +12,16 @@ module PolymorphicConstraints
 
       def add_polymorphic_constraints(relation, associated_table, options = {})
         polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation) }
-        triggers = []
-        triggers << generate_input_constraints(relation, associated_table, polymorphic_models)
-        triggers << generate_delete_constraints(relation, associated_table, polymorphic_models)
+        statements = []
+        statements << generate_upsert_constraints(relation, associated_table, polymorphic_models)
+        statements << generate_delete_constraints(relation, associated_table, polymorphic_models)
 
-        triggers.each { |trigger| execute trigger }
+        statements.each { |statement| execute statement }
       end
 
       def remove_polymorphic_constraints(relation)
-        triggers = []
-        triggers << drop_constraints(relation)
-
-        triggers.each { |trigger| execute trigger }
+        statement = drop_constraints(relation)
+        execute statement
       end
 
       private
@@ -36,15 +34,15 @@ module PolymorphicConstraints
         end
       end
 
-      def generate_input_constraints(relation, associated_table, polymorphic_models)
+      def generate_upsert_constraints(relation, associated_table, polymorphic_models)
         associated_table = associated_table.to_s
         polymorphic_models = polymorphic_models.map(&:to_s)
 
-        sql = "DROP FUNCTION IF EXISTS check_#{relation}_create_integrity()
+        sql = "DROP FUNCTION IF EXISTS check_#{relation}_upsert_integrity()
                  CASCADE;"
 
         sql << %{
-          CREATE FUNCTION check_#{relation}_create_integrity()
+          CREATE FUNCTION check_#{relation}_upsert_integrity()
           RETURNS TRIGGER AS '
             BEGIN
               IF NEW.#{relation}_type = ''#{polymorphic_models[0].classify}'' AND EXISTS (
@@ -72,10 +70,10 @@ module PolymorphicConstraints
           END'
           LANGUAGE plpgsql;
 
-          CREATE TRIGGER check_#{relation}_create_integrity_trigger
+          CREATE TRIGGER check_#{relation}_upsert_integrity_trigger
           BEFORE INSERT OR UPDATE ON #{associated_table}
           FOR EACH ROW
-          EXECUTE PROCEDURE check_#{relation}_create_integrity();
+          EXECUTE PROCEDURE check_#{relation}_upsert_integrity();
         }
 
         strip_non_essential_spaces(sql)
@@ -139,7 +137,7 @@ module PolymorphicConstraints
 
       def drop_constraints(relation)
         sql = %{
-          DROP FUNCTION IF EXISTS check_#{relation}_create_integrity()
+          DROP FUNCTION IF EXISTS check_#{relation}_upsert_integrity()
             CASCADE;
           DROP FUNCTION IF EXISTS check_#{relation}_delete_integrity()
             CASCADE;
