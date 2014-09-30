@@ -2,6 +2,7 @@ require 'spec_helper'
 require 'polymorphic_constraints/connection_adapters/postgresql_adapter'
 
 describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
+
   class TestAdapter
     include Support::AdapterHelper
     include PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter

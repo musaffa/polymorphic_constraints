@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe 'Active Record Integration' do
 
   context 'insertion' do

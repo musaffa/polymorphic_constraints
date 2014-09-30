@@ -14,10 +14,14 @@ module PolymorphicConstraints
         polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation) }
         statements = []
 
+        statements << drop_trigger(relation, 'create')
         statements << generate_create_constraints(relation, associated_table, polymorphic_models)
+
+        statements << drop_trigger(relation, 'update')
         statements << generate_update_constraints(relation, associated_table, polymorphic_models)
 
         polymorphic_models.each do |polymorphic_model|
+          statements << drop_delete_trigger(relation, polymorphic_model)
           statements << generate_delete_constraints(relation, associated_table, polymorphic_model)
         end
 
@@ -26,8 +30,16 @@ module PolymorphicConstraints
 
       def remove_polymorphic_constraints(relation, options = {})
         polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation) }
-        statement = drop_constraints(relation, polymorphic_models)
-        execute statement
+        statements = []
+
+        statements << drop_trigger(relation, 'create')
+        statements << drop_trigger(relation, 'update')
+
+        polymorphic_models.each do |polymorphic_model|
+          statements << drop_delete_trigger(relation, polymorphic_model)
+        end
+
+        statements.each { |statement| execute statement }
       end
 
       private
@@ -40,18 +52,25 @@ module PolymorphicConstraints
         end
       end
 
+      def drop_trigger(relation, action)
+        strip_non_essential_spaces "DROP TRIGGER IF EXISTS check_#{relation}_#{action}_integrity;"
+      end
+
+      def drop_delete_trigger(relation, polymorphic_model)
+        table_name = polymorphic_model.to_s.classify.constantize.table_name
+        strip_non_essential_spaces "DROP TRIGGER IF EXISTS check_#{relation}_#{table_name}_delete_integrity;"
+      end
+
       def generate_create_constraints(relation, associated_table, polymorphic_models)
         associated_table = associated_table.to_s
         polymorphic_models = polymorphic_models.map(&:to_s)
 
         sql = %{
 
-        DROP TRIGGER IF EXISTS check_#{relation}_create_integrity;
-
-        CREATE TRIGGER check_#{relation}_create_integrity
-          BEFORE INSERT ON #{associated_table}
-          BEGIN
-            SELECT CASE
+          CREATE TRIGGER check_#{relation}_create_integrity
+            BEFORE INSERT ON #{associated_table}
+            BEGIN
+              SELECT CASE
         }
 
         sql << 'WHEN ('
@@ -82,8 +101,6 @@ module PolymorphicConstraints
         polymorphic_models = polymorphic_models.map(&:to_s)
 
         sql = %{
-
-          DROP TRIGGER IF EXISTS check_#{relation}_update_integrity;
 
           CREATE TRIGGER check_#{relation}_update_integrity
             BEFORE UPDATE ON #{associated_table.classify.constantize.table_name}
@@ -120,8 +137,6 @@ module PolymorphicConstraints
         
         sql = %{
 
-          DROP TRIGGER IF EXISTS check_#{relation}_#{polymorphic_model.classify.constantize.table_name}_delete_integrity;
-
           CREATE TRIGGER
             check_#{relation}_#{polymorphic_model.classify.constantize.table_name}_delete_integrity
             BEFORE DELETE ON #{polymorphic_model.classify.constantize.table_name}
@@ -142,23 +157,6 @@ module PolymorphicConstraints
             END;
 
         }
-
-        strip_non_essential_spaces(sql)
-      end
-
-      def drop_constraints(relation, polymorphic_models)
-        polymorphic_models = polymorphic_models.map(&:to_s)
-
-        sql = %{
-          DROP TRIGGER IF EXISTS check_#{relation}_create_integrity;
-          DROP TRIGGER IF EXISTS check_#{relation}_update_integrity;
-        }
-
-        polymorphic_models.each do |polymorphic_model|
-          sql << %{
-            DROP TRIGGER IF EXISTS check_#{relation}_#{polymorphic_model.classify.constantize.table_name}_delete_integrity;
-          }
-        end
 
         strip_non_essential_spaces(sql)
       end

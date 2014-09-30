@@ -2,6 +2,7 @@ require 'spec_helper'
 require 'polymorphic_constraints/connection_adapters/sqlite3_adapter'
 
 describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
+
   class TestAdapter
     include Support::AdapterHelper
     include PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter
@@ -15,31 +16,46 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
 
   describe 'add constraints' do
     it 'returns expected add constraints sql' do
-      expect(subject.add_polymorphic_constraints(:imageable, :pictures)).to eql([create_triggers_sql,
-                                                                                 update_triggers_sql,
-                                                                                 delete_employees_triggers_sql,
-                                                                                 delete_products_triggers_sql])
+      expect(subject.add_polymorphic_constraints(:imageable, :pictures)).to eql([drop_create_trigger_sql,
+                                                                                 create_trigger_sql,
+                                                                                 drop_update_trigger_sql,
+                                                                                 update_trigger_sql,
+                                                                                 drop_employees_delete_trigger_sql,
+                                                                                 employees_delete_trigger_sql,
+                                                                                 drop_products_delete_trigger_sql,
+                                                                                 products_delete_trigger_sql])
     end
 
     it 'returns expected add constraints sql with polymorphic model options' do
       expect(subject.add_polymorphic_constraints(:imageable, :pictures,
-                                                 polymorphic_models: [:employee, :product])).to eql([create_triggers_sql,
-                                                                                                     update_triggers_sql,
-                                                                                                     delete_employees_triggers_sql,
-                                                                                                     delete_products_triggers_sql])
+                                                 polymorphic_models: [:employee, :product])).to eql([drop_create_trigger_sql,
+                                                                                                     create_trigger_sql,
+                                                                                                     drop_update_trigger_sql,
+                                                                                                     update_trigger_sql,
+                                                                                                     drop_employees_delete_trigger_sql,
+                                                                                                     employees_delete_trigger_sql,
+                                                                                                     drop_products_delete_trigger_sql,
+                                                                                                     products_delete_trigger_sql])
     end
   end
 
   describe 'remove constraints' do
     it 'returns expected drop trigger sql' do
-      expect(subject.remove_polymorphic_constraints(:imageable)).to eql(drop_triggers_sql)
+      expect(subject.remove_polymorphic_constraints(:imageable)).to eql([drop_create_trigger_sql,
+                                                                         drop_update_trigger_sql,
+                                                                         drop_employees_delete_trigger_sql,
+                                                                         drop_products_delete_trigger_sql])
     end
   end
 
-  let(:create_triggers_sql) do
+  let(:drop_create_trigger_sql) do
     subject.strip_non_essential_spaces(%{
       DROP TRIGGER IF EXISTS check_imageable_create_integrity;
+    })
+  end
 
+  let(:create_trigger_sql) do
+    subject.strip_non_essential_spaces(%{
       CREATE TRIGGER check_imageable_create_integrity
       BEFORE INSERT ON pictures
       BEGIN
@@ -52,10 +68,14 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
     })
   end
 
-  let(:update_triggers_sql) do
+  let(:drop_update_trigger_sql) do
     subject.strip_non_essential_spaces(%{
       DROP TRIGGER IF EXISTS check_imageable_update_integrity;
+    })
+  end
 
+  let(:update_trigger_sql) do
+    subject.strip_non_essential_spaces(%{
       CREATE TRIGGER check_imageable_update_integrity
       BEFORE UPDATE ON pictures
       BEGIN
@@ -68,10 +88,14 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
     })
   end
 
-  let(:delete_employees_triggers_sql) do
+  let(:drop_employees_delete_trigger_sql) do
     subject.strip_non_essential_spaces(%{
       DROP TRIGGER IF EXISTS check_imageable_employees_delete_integrity;
+    })
+  end
 
+  let(:employees_delete_trigger_sql) do
+    subject.strip_non_essential_spaces(%{
       CREATE TRIGGER check_imageable_employees_delete_integrity
         BEFORE DELETE ON employees
         BEGIN
@@ -83,10 +107,14 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
     })
   end
 
-  let(:delete_products_triggers_sql) do
+  let(:drop_products_delete_trigger_sql) do
     subject.strip_non_essential_spaces(%{
       DROP TRIGGER IF EXISTS check_imageable_products_delete_integrity;
+    })
+  end
 
+  let(:products_delete_trigger_sql) do
+    subject.strip_non_essential_spaces(%{
       CREATE TRIGGER check_imageable_products_delete_integrity
         BEFORE DELETE ON products
         BEGIN
@@ -95,15 +123,6 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
               RAISE(ABORT, 'There are records in the pictures table that refer to the products record that is attempting to be deleted. Delete the dependent records in the pictures table first.')
           END;
         END;
-    })
-  end
-
-  let(:drop_triggers_sql) do
-    subject.strip_non_essential_spaces(%{
-      DROP TRIGGER IF EXISTS check_imageable_create_integrity;
-      DROP TRIGGER IF EXISTS check_imageable_update_integrity;
-      DROP TRIGGER IF EXISTS check_imageable_employees_delete_integrity;
-      DROP TRIGGER IF EXISTS check_imageable_products_delete_integrity;
     })
   end
 end
