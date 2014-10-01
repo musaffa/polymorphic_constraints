@@ -52,12 +52,12 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
 
       CREATE FUNCTION check_imageable_upsert_integrity() RETURNS TRIGGER AS '
         BEGIN
-          IF NEW.imageable_type = ''Employee'' AND EXISTS (
-              SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
+          IF NEW.imageable_type = ''Employee'' AND
+             EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
             RETURN NEW;
 
-          ELSEIF NEW.imageable_type = ''Product'' AND EXISTS (
-              SELECT id FROM products WHERE id = NEW.imageable_id) THEN
+          ELSEIF NEW.imageable_type = ''Product'' AND
+                 EXISTS (SELECT id FROM products WHERE id = NEW.imageable_id) THEN
             RETURN NEW;
 
           ELSE
@@ -81,18 +81,20 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
       CREATE FUNCTION check_imageable_delete_integrity()
       RETURNS TRIGGER AS '
         BEGIN
-          IF TG_TABLE_NAME = ''employees'' AND EXISTS (
-              SELECT id FROM pictures
-              WHERE imageable_type = ''Employee'' AND imageable_id = OLD.id) THEN
-              RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
-                You must delete those records first.'', TG_TABLE_NAME, OLD.id;
+          IF TG_TABLE_NAME = ''employees'' AND
+             EXISTS (SELECT id FROM pictures
+                     WHERE imageable_type = ''Employee'' AND imageable_id = OLD.id) THEN
+
+            RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
+                              You must delete those records of table pictures first.'', TG_TABLE_NAME, OLD.id;
             RETURN NULL;
 
-          ELSEIF TG_TABLE_NAME = ''products'' AND EXISTS (
-              SELECT id FROM pictures
-              WHERE imageable_type = ''Product'' AND imageable_id = OLD.id) THEN
-              RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
-                You must delete those records first.'', TG_TABLE_NAME, OLD.id;
+          ELSEIF TG_TABLE_NAME = ''products'' AND
+                 EXISTS (SELECT id FROM pictures
+                         WHERE imageable_type = ''Product'' AND imageable_id = OLD.id) THEN
+
+            RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
+                              You must delete those records of table pictures first.'', TG_TABLE_NAME, OLD.id;
             RETURN NULL;
 
           ELSE
@@ -118,16 +120,16 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
 
       CREATE FUNCTION check_imageable_upsert_integrity() RETURNS TRIGGER AS '
         BEGIN
-          IF NEW.imageable_type = ''Member'' AND EXISTS (
-              SELECT id FROM members WHERE id = NEW.imageable_id) THEN
+          IF NEW.imageable_type = ''Member'' AND
+             EXISTS (SELECT id FROM members WHERE id = NEW.imageable_id) THEN
             RETURN NEW;
 
-          ELSEIF NEW.imageable_type = ''Employee'' AND EXISTS (
-              SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
+          ELSEIF NEW.imageable_type = ''Employee'' AND
+                 EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
             RETURN NEW;
 
-          ELSEIF NEW.imageable_type = ''Product'' AND EXISTS (
-              SELECT id FROM products WHERE id = NEW.imageable_id) THEN
+          ELSEIF NEW.imageable_type = ''Product'' AND
+                 EXISTS (SELECT id FROM products WHERE id = NEW.imageable_id) THEN
             RETURN NEW;
 
           ELSE
@@ -151,25 +153,28 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
       CREATE FUNCTION check_imageable_delete_integrity()
       RETURNS TRIGGER AS '
         BEGIN
-          IF TG_TABLE_NAME = ''members'' AND EXISTS (
-              SELECT id FROM pictures
-              WHERE imageable_type = ''Member'' AND imageable_id = OLD.id) THEN
-              RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
-                You must delete those records first.'', TG_TABLE_NAME, OLD.id;
+          IF TG_TABLE_NAME = ''members'' AND
+             EXISTS (SELECT id FROM pictures
+                     WHERE imageable_type = ''Member'' AND imageable_id = OLD.id) THEN
+
+            RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
+                              You must delete those records of table pictures first.'', TG_TABLE_NAME, OLD.id;
             RETURN NULL;
 
-          ELSEIF TG_TABLE_NAME = ''employees'' AND EXISTS (
-              SELECT id FROM pictures
-              WHERE imageable_type = ''Employee'' AND imageable_id = OLD.id) THEN
-              RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
-                You must delete those records first.'', TG_TABLE_NAME, OLD.id;
+          ELSEIF TG_TABLE_NAME = ''employees'' AND
+                 EXISTS (SELECT id FROM pictures
+                         WHERE imageable_type = ''Employee'' AND imageable_id = OLD.id) THEN
+
+            RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
+                              You must delete those records of table pictures first.'', TG_TABLE_NAME, OLD.id;
             RETURN NULL;
 
-          ELSEIF TG_TABLE_NAME = ''products'' AND EXISTS (
-              SELECT id FROM pictures
-              WHERE imageable_type = ''Product'' AND imageable_id = OLD.id) THEN
-              RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
-                You must delete those records first.'', TG_TABLE_NAME, OLD.id;
+          ELSEIF TG_TABLE_NAME = ''products'' AND
+                 EXISTS (SELECT id FROM pictures
+                         WHERE imageable_type = ''Product'' AND imageable_id = OLD.id) THEN
+
+            RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
+                              You must delete those records of table pictures first.'', TG_TABLE_NAME, OLD.id;
             RETURN NULL;
 
           ELSE
@@ -199,8 +204,8 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
 
       CREATE FUNCTION check_imageable_upsert_integrity() RETURNS TRIGGER AS '
         BEGIN
-          IF NEW.imageable_type = ''Employee'' AND EXISTS (
-              SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
+          IF NEW.imageable_type = ''Employee'' AND
+             EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
             RETURN NEW;
 
           ELSE
@@ -224,11 +229,12 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
       CREATE FUNCTION check_imageable_delete_integrity()
       RETURNS TRIGGER AS '
         BEGIN
-          IF TG_TABLE_NAME = ''employees'' AND EXISTS (
-              SELECT id FROM pictures
-              WHERE imageable_type = ''Employee'' AND imageable_id = OLD.id) THEN
-              RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
-                You must delete those records first.'', TG_TABLE_NAME, OLD.id;
+          IF TG_TABLE_NAME = ''employees'' AND
+             EXISTS (SELECT id FROM pictures
+                     WHERE imageable_type = ''Employee'' AND imageable_id = OLD.id) THEN
+
+            RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
+                              You must delete those records of table pictures first.'', TG_TABLE_NAME, OLD.id;
             RETURN NULL;
 
           ELSE

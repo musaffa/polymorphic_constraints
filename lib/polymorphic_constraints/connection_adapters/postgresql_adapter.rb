@@ -38,20 +38,20 @@ module PolymorphicConstraints
 
         sql << %{
           CREATE FUNCTION check_#{relation}_upsert_integrity()
-          RETURNS TRIGGER AS '
-            BEGIN
-              IF NEW.#{relation}_type = ''#{polymorphic_models[0].classify}'' AND EXISTS (
-                  SELECT id FROM #{polymorphic_models[0].classify.constantize.table_name}
-                  WHERE id = NEW.#{relation}_id) THEN
+            RETURNS TRIGGER AS '
+              BEGIN
+                IF NEW.#{relation}_type = ''#{polymorphic_models[0].classify}'' AND
+                   EXISTS (SELECT id FROM #{polymorphic_models[0].classify.constantize.table_name}
+                           WHERE id = NEW.#{relation}_id) THEN
 
-                RETURN NEW;
+                  RETURN NEW;
         }
 
         polymorphic_models[1..-1].each do |polymorphic_model|
           sql << %{
-            ELSEIF NEW.#{relation}_type = ''#{polymorphic_model.classify}'' AND EXISTS (
-                SELECT id FROM #{polymorphic_model.classify.constantize.table_name}
-                WHERE id = NEW.#{relation}_id) THEN
+            ELSEIF NEW.#{relation}_type = ''#{polymorphic_model.classify}'' AND
+                   EXISTS (SELECT id FROM #{polymorphic_model.classify.constantize.table_name}
+                           WHERE id = NEW.#{relation}_id) THEN
 
               RETURN NEW;
           }
@@ -66,9 +66,9 @@ module PolymorphicConstraints
           LANGUAGE plpgsql;
 
           CREATE TRIGGER check_#{relation}_upsert_integrity_trigger
-          BEFORE INSERT OR UPDATE ON #{associated_table}
-          FOR EACH ROW
-          EXECUTE PROCEDURE check_#{relation}_upsert_integrity();
+            BEFORE INSERT OR UPDATE ON #{associated_table}
+            FOR EACH ROW
+            EXECUTE PROCEDURE check_#{relation}_upsert_integrity();
         }
 
         strip_non_essential_spaces(sql)
@@ -82,29 +82,27 @@ module PolymorphicConstraints
                  CASCADE;"
         sql << %{
           CREATE FUNCTION check_#{relation}_delete_integrity()
-          RETURNS TRIGGER AS '
-            BEGIN
-              IF TG_TABLE_NAME = ''#{polymorphic_models[0].classify.constantize.table_name}'' AND
-              EXISTS (
-                  SELECT id FROM #{associated_table}
-                  WHERE #{relation}_type = ''#{polymorphic_models[0].classify}''
-                  AND #{relation}_id = OLD.id) THEN
+            RETURNS TRIGGER AS '
+              BEGIN
+                IF TG_TABLE_NAME = ''#{polymorphic_models[0].classify.constantize.table_name}'' AND
+                   EXISTS (SELECT id FROM #{associated_table}
+                           WHERE #{relation}_type = ''#{polymorphic_models[0].classify}''
+                           AND #{relation}_id = OLD.id) THEN
 
-                RAISE EXCEPTION ''There are records in #{associated_table} that refer to the
-                table % with id %. You must delete those records first.'', TG_TABLE_NAME, OLD.id;
-                RETURN NULL;
+                  RAISE EXCEPTION ''There are records in #{associated_table} that refer to the table % with id %.
+                                    You must delete those records of table #{associated_table} first.'', TG_TABLE_NAME, OLD.id;
+                  RETURN NULL;
         }
 
         polymorphic_models[1..-1].each do |polymorphic_model|
           sql << %{
             ELSEIF TG_TABLE_NAME = ''#{polymorphic_model.classify.constantize.table_name}'' AND
-            EXISTS (
-                SELECT id FROM #{associated_table}
-                WHERE #{relation}_type = ''#{polymorphic_model.classify}''
-                AND #{relation}_id = OLD.id) THEN
+                   EXISTS (SELECT id FROM #{associated_table}
+                           WHERE #{relation}_type = ''#{polymorphic_model.classify}''
+                           AND #{relation}_id = OLD.id) THEN
 
-              RAISE EXCEPTION ''There are records in #{associated_table} that refer to the
-              table % with id %. You must delete those records first.'', TG_TABLE_NAME, OLD.id;
+              RAISE EXCEPTION ''There are records in #{associated_table} that refer to the table % with id %.
+                                You must delete those records of table #{associated_table} first.'', TG_TABLE_NAME, OLD.id;
               RETURN NULL;
           }
         end
@@ -122,8 +120,9 @@ module PolymorphicConstraints
 
           sql << %{
             CREATE TRIGGER check_#{table_name}_delete_integrity_trigger
-            BEFORE DELETE ON #{table_name}
-            FOR EACH ROW EXECUTE PROCEDURE check_#{relation}_delete_integrity();
+              BEFORE DELETE ON #{table_name}
+              FOR EACH ROW
+              EXECUTE PROCEDURE check_#{relation}_delete_integrity();
           }
         end
 

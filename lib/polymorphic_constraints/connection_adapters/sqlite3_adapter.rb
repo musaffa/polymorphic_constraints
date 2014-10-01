@@ -17,7 +17,7 @@ module PolymorphicConstraints
         polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation, search_strategy) }
         statements = []
 
-        statements << drop_trigger(relation, 'create')
+        statements << drop_trigger(relation, 'insert')
         statements << generate_create_constraints(relation, associated_table, polymorphic_models)
 
         statements << drop_trigger(relation, 'update')
@@ -36,7 +36,7 @@ module PolymorphicConstraints
         polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation, search_strategy) }
         statements = []
 
-        statements << drop_trigger(relation, 'create')
+        statements << drop_trigger(relation, 'insert')
         statements << drop_trigger(relation, 'update')
 
         polymorphic_models.each do |polymorphic_model|
@@ -59,35 +59,13 @@ module PolymorphicConstraints
 
       def generate_create_constraints(relation, associated_table, polymorphic_models)
         associated_table = associated_table.to_s
-        polymorphic_models = polymorphic_models.map(&:to_s)
 
         sql = %{
-
-          CREATE TRIGGER check_#{relation}_create_integrity
+          CREATE TRIGGER check_#{relation}_insert_integrity
             BEFORE INSERT ON #{associated_table}
-            BEGIN
-              SELECT CASE
         }
 
-        sql << 'WHEN ('
-
-        polymorphic_models.each do |polymorphic_model|
-          sql << %{NEW.#{relation}_type != '#{polymorphic_model.classify}' }
-          sql << 'AND ' unless polymorphic_model == polymorphic_models.last
-        end
-
-        sql << %{) THEN RAISE(ABORT, 'There is no model by that name.') }
-
-        polymorphic_models.each do |polymorphic_model|
-          sql << %{
-            WHEN ((NEW.#{relation}_type = '#{polymorphic_model.classify}') AND (SELECT id
-              FROM #{polymorphic_model.classify.constantize.table_name}
-              WHERE id = NEW.#{relation}_id) ISNULL)
-              THEN RAISE(ABORT, 'There is no #{polymorphic_model.classify} with that id.')
-          }
-        end
-
-        sql << "END; END;"
+        sql << common_upsert_sql(relation, polymorphic_models)
 
         strip_non_essential_spaces(sql)
       end
@@ -97,11 +75,43 @@ module PolymorphicConstraints
         polymorphic_models = polymorphic_models.map(&:to_s)
 
         sql = %{
-
           CREATE TRIGGER check_#{relation}_update_integrity
-            BEFORE UPDATE ON #{associated_table.classify.constantize.table_name}
+            BEFORE UPDATE ON #{associated_table}
+        }
+
+        sql << common_upsert_sql(relation, polymorphic_models)
+
+        strip_non_essential_spaces(sql)
+      end
+
+      def generate_delete_constraints(relation, associated_table, polymorphic_model)
+        associated_table = associated_table.to_s
+        polymorphic_model = polymorphic_model.to_s
+        
+        sql = %{
+          CREATE TRIGGER check_#{relation}_#{polymorphic_model.classify.constantize.table_name}_delete_integrity
+            BEFORE DELETE ON #{polymorphic_model.classify.constantize.table_name}
             BEGIN
               SELECT CASE
+                WHEN EXISTS (SELECT id FROM #{associated_table}
+                             WHERE #{relation}_type = '#{polymorphic_model.classify}'
+                             AND #{relation}_id = OLD.id) THEN
+                  RAISE(ABORT, 'There are records in the #{associated_table} table that refer to the
+                                table #{polymorphic_model.classify.constantize.table_name}.
+                                You must delete those records of table #{associated_table} first.')
+              END;
+            END;
+        }
+
+        strip_non_essential_spaces(sql)
+      end
+
+      def common_upsert_sql(relation, polymorphic_models)
+        polymorphic_models = polymorphic_models.map(&:to_s)
+
+        sql = %{
+          BEGIN
+            SELECT CASE
         }
 
         sql << 'WHEN ('
@@ -115,46 +125,14 @@ module PolymorphicConstraints
 
         polymorphic_models.each do |polymorphic_model|
           sql << %{
-            WHEN ((NEW.#{relation}_type = '#{polymorphic_model.classify}') AND (SELECT id
-              FROM #{polymorphic_model.classify.constantize.table_name}
-              WHERE id = NEW.#{relation}_id) ISNULL)
-              THEN RAISE(ABORT, 'There is no #{polymorphic_model.classify} with that id.')
+            WHEN ((NEW.#{relation}_type = '#{polymorphic_model.classify}') AND
+                  NOT EXISTS (SELECT id FROM #{polymorphic_model.classify.constantize.table_name}
+                              WHERE id = NEW.#{relation}_id)) THEN
+              RAISE(ABORT, 'There is no #{polymorphic_model.classify} with that id.')
           }
         end
 
         sql << "END; END;"
-
-        strip_non_essential_spaces(sql)
-      end
-
-      def generate_delete_constraints(relation, associated_table, polymorphic_model)
-        associated_table = associated_table.to_s
-        polymorphic_model = polymorphic_model.to_s
-        
-        sql = %{
-
-          CREATE TRIGGER
-            check_#{relation}_#{polymorphic_model.classify.constantize.table_name}_delete_integrity
-            BEFORE DELETE ON #{polymorphic_model.classify.constantize.table_name}
-            BEGIN
-              SELECT CASE
-                WHEN ((SELECT id FROM #{associated_table}
-                  WHERE #{relation}_type = '#{polymorphic_model.classify}'
-                  AND #{relation}_id = OLD.id) NOTNULL) THEN
-                    RAISE(ABORT,
-                      'There are records in the
-                      #{associated_table}
-                      table that refer to the
-                      #{polymorphic_model.classify.constantize.table_name} record that is
-                      attempting to be deleted. Delete the dependent records in
-                      the #{associated_table} table
-                      first.')
-              END;
-            END;
-
-        }
-
-        strip_non_essential_spaces(sql)
       end
     end
   end
