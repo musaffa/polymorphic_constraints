@@ -45,6 +45,7 @@ GEM
     mime-types (2.3)
     minitest (5.4.1)
     multi_json (1.10.1)
+    mysql2 (0.3.16)
     pg (0.17.1)
     rack (1.5.2)
     rack-test (0.6.2)
@@ -101,6 +102,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  mysql2
   pg
   polymorphic_constraints!
   rspec-rails (~> 3.0.2)

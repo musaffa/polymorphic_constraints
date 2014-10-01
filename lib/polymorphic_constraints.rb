@@ -20,7 +20,8 @@ module PolymorphicConstraints
   end
 end
 
-PolymorphicConstraints::Adapter.register 'postgresql', 'polymorphic_constraints/connection_adapters/postgresql_adapter'
 PolymorphicConstraints::Adapter.register 'sqlite3', 'polymorphic_constraints/connection_adapters/sqlite3_adapter'
+PolymorphicConstraints::Adapter.register 'postgresql', 'polymorphic_constraints/connection_adapters/postgresql_adapter'
+PolymorphicConstraints::Adapter.register 'mysql2', 'polymorphic_constraints/connection_adapters/mysql2_adapter'
 
 require 'polymorphic_constraints/railtie' if defined?(Rails)

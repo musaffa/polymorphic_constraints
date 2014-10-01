@@ -4,15 +4,22 @@ rescue LoadError
   puts 'You must `gem install bundler` and `bundle install` to run rake tasks'
 end
 
-require 'pg'
-require 'yaml'
 require 'sqlite3'
+require 'pg'
+require 'mysql2'
+require 'yaml'
+require 'fileutils'
 require 'rspec/core/rake_task'
 # require 'rdoc/task'
-require 'fileutils'
 
 def prepare_database_config(adapter)
   FileUtils.copy "spec/dummy/config/database.#{adapter}.yml", 'spec/dummy/config/database.yml'
+end
+
+def connection_config
+  path = File.join(File.dirname(__FILE__), 'spec', 'dummy', 'config', 'database.yml')
+  yaml = YAML.load_file(path)
+  yaml['test']
 end
 
 SQLITE3_FILE_PATH = 'spec/dummy/db/test.sqlite3'
@@ -23,28 +30,36 @@ def sqlite3_db
 end
 
 def postgres_db
-  path = File.join(File.dirname(__FILE__), 'spec', 'dummy', 'config', 'database.yml')
-  yaml = YAML.load_file(path)
-  pg_connection_config = yaml['test']
+  pg_connection_config = connection_config
+
   begin
-    conn = PG.connect(dbname: 'postgres',
-                      password: pg_connection_config.fetch('password'),
-                      host: pg_connection_config.fetch('host'),
-                      user: pg_connection_config.fetch('username'))
-    conn.exec("DROP DATABASE IF EXISTS #{pg_connection_config['database']};") {}
-    conn.exec("CREATE DATABASE #{pg_connection_config['database']};") {}
+    client = PG.connect(user: pg_connection_config.fetch('username'),
+                        host: pg_connection_config.fetch('host'))
+    client.exec("DROP DATABASE IF EXISTS #{pg_connection_config['database']};") {}
+    client.exec("CREATE DATABASE #{pg_connection_config['database']};") {}
   rescue PGError => e
     puts e
   ensure
-    conn.close unless conn.nil?
+    client.close unless client.nil?
+  end
+end
+
+def mysql_db
+  mysql_connection_config = connection_config
+
+  begin
+    client = Mysql2::Client.new(username: mysql_connection_config.fetch('username'),
+                                host: mysql_connection_config.fetch('host'))
+    client.query("DROP DATABASE IF EXISTS #{mysql_connection_config['database']};")
+    client.query("CREATE DATABASE #{mysql_connection_config['database']};")
+  rescue Mysql2::Error => e
+    puts e
+  ensure
+    client.close unless client.nil?
   end
 end
 
 def connect_db
-  path = File.join(File.dirname(__FILE__), 'spec', 'dummy', 'config', 'database.yml')
-  yaml = YAML.load_file(path)
-  connection_config = yaml['test']
-
   ActiveRecord::Base.establish_connection(connection_config)
 end
 
@@ -80,7 +95,7 @@ namespace :test do
 
   namespace :integration do
     task :sqlite do
-      task(:environment).invoke('sqlite3')
+      task(:environment).invoke('sqlite')
 
       RSpec::Core::RakeTask.new(:sqlite) do |t|
         t.pattern = 'spec/integration/active_record_integration_spec.rb'
@@ -105,6 +120,20 @@ namespace :test do
       migrate_db
 
       Rake::Task['postgresql'].execute
+    end
+
+    task :mysql do
+      task(:environment).invoke('mysql')
+
+      RSpec::Core::RakeTask.new(:mysql) do |t|
+        t.pattern = 'spec/integration/active_record_integration_spec.rb'
+      end
+
+      mysql_db
+      connect_db
+      migrate_db
+
+      Rake::Task['mysql'].execute
     end
   end
 end

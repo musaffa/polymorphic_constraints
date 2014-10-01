@@ -1,6 +1,6 @@
 test:
-  adapter: postgresql
+  adapter: mysql2
   encoding: utf8
-  username: postgres
+  username: root
   database: polymorphic_constraints
   host: localhost
