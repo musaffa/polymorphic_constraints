@@ -1,17 +1,20 @@
 require 'active_support/inflector'
 require_relative '../utils/sql_string'
+require_relative '../utils/model_finder'
 
 module PolymorphicConstraints
   module ConnectionAdapters
     module SQLite3Adapter
       include PolymorphicConstraints::Utils::SqlString
+      include PolymorphicConstraints::Utils::ModelFinder
 
       def supports_polymorphic_constraints?
         true
       end
 
       def add_polymorphic_constraints(relation, associated_table, options = {})
-        polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation) }
+        search_strategy = options.fetch(:search_strategy, :active_record_descendants)
+        polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation, search_strategy) }
         statements = []
 
         statements << drop_trigger(relation, 'create')
@@ -29,7 +32,8 @@ module PolymorphicConstraints
       end
 
       def remove_polymorphic_constraints(relation, options = {})
-        polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation) }
+        search_strategy = options.fetch(:search_strategy, :active_record_descendants)
+        polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation, search_strategy) }
         statements = []
 
         statements << drop_trigger(relation, 'create')
@@ -43,14 +47,6 @@ module PolymorphicConstraints
       end
 
       private
-
-      def get_polymorphic_models(relation)
-        Rails.application.eager_load!
-        ActiveRecord::Base.descendants.select do |klass|
-          associations = klass.reflect_on_all_associations
-          associations.map{ |r| r.options[:as] }.include?(relation.to_sym)
-        end
-      end
 
       def drop_trigger(relation, action)
         strip_non_essential_spaces "DROP TRIGGER IF EXISTS check_#{relation}_#{action}_integrity;"
