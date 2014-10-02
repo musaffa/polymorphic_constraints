@@ -13,9 +13,6 @@ module PolymorphicConstraints
         false
       end
 
-      # def polymorphic_constraints_exists?(table_name, options)
-      # end
-
       def add_polymorphic_constraints(relation, associated_model, options = {})
       end
 
