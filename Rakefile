@@ -71,7 +71,7 @@ task :environment, :adapter do |t, args|
   ENV['RAILS_ENV'] ||= 'test'
   prepare_database_config(args.adapter)
   require_relative 'spec/dummy/config/environment'
-  require_relative 'spec/dummy/db/migrate/polymorphic_tables'
+  require_relative 'spec/dummy/db/migrate/20141002195532_polymorphic_tables'
 end
 
 namespace :test do
