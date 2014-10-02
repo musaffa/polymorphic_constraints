@@ -119,7 +119,7 @@ module PolymorphicConstraints
           table_name = polymorphic_model.classify.constantize.table_name
 
           sql << %{
-            CREATE TRIGGER check_#{table_name}_delete_integrity_trigger
+            CREATE TRIGGER check_#{relation}_#{table_name}_delete_integrity_trigger
               BEFORE DELETE ON #{table_name}
               FOR EACH ROW
               EXECUTE PROCEDURE check_#{relation}_delete_integrity();

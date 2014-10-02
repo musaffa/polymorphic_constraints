@@ -103,11 +103,11 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
         END'
       LANGUAGE plpgsql;
 
-      CREATE TRIGGER check_employees_delete_integrity_trigger
+      CREATE TRIGGER check_imageable_employees_delete_integrity_trigger
         BEFORE DELETE ON employees
         FOR EACH ROW EXECUTE PROCEDURE check_imageable_delete_integrity();
 
-      CREATE TRIGGER check_products_delete_integrity_trigger
+      CREATE TRIGGER check_imageable_products_delete_integrity_trigger
         BEFORE DELETE ON products
         FOR EACH ROW EXECUTE PROCEDURE check_imageable_delete_integrity();
     })
@@ -183,15 +183,15 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
         END'
       LANGUAGE plpgsql;
 
-      CREATE TRIGGER check_members_delete_integrity_trigger
+      CREATE TRIGGER check_imageable_members_delete_integrity_trigger
         BEFORE DELETE ON members
         FOR EACH ROW EXECUTE PROCEDURE check_imageable_delete_integrity();
 
-      CREATE TRIGGER check_employees_delete_integrity_trigger
+      CREATE TRIGGER check_imageable_employees_delete_integrity_trigger
         BEFORE DELETE ON employees
         FOR EACH ROW EXECUTE PROCEDURE check_imageable_delete_integrity();
 
-      CREATE TRIGGER check_products_delete_integrity_trigger
+      CREATE TRIGGER check_imageable_products_delete_integrity_trigger
         BEFORE DELETE ON products
         FOR EACH ROW EXECUTE PROCEDURE check_imageable_delete_integrity();
     })
@@ -243,7 +243,7 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
         END'
       LANGUAGE plpgsql;
 
-      CREATE TRIGGER check_employees_delete_integrity_trigger
+      CREATE TRIGGER check_imageable_employees_delete_integrity_trigger
         BEFORE DELETE ON employees
         FOR EACH ROW EXECUTE PROCEDURE check_imageable_delete_integrity();
     })
