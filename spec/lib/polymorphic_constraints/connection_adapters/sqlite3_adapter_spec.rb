@@ -86,7 +86,7 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
       BEFORE INSERT ON pictures
       BEGIN
         SELECT CASE
-          WHEN (NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' ) THEN
+          WHEN ( NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' ) THEN
             RAISE(ABORT, 'There is no model by that name.')
           WHEN ((NEW.imageable_type = 'Employee') AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id)) THEN
             RAISE(ABORT, 'There is no Employee with that id.')
@@ -105,7 +105,7 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
       BEFORE UPDATE ON pictures
       BEGIN
         SELECT CASE
-          WHEN (NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' ) THEN
+          WHEN ( NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' ) THEN
             RAISE(ABORT, 'There is no model by that name.')
           WHEN ((NEW.imageable_type = 'Employee') AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id)) THEN
             RAISE(ABORT, 'There is no Employee with that id.')
@@ -170,7 +170,7 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
       BEFORE INSERT ON pictures
       BEGIN
         SELECT CASE
-          WHEN (NEW.imageable_type != 'Member' AND NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' ) THEN
+          WHEN ( NEW.imageable_type != 'Member' AND NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' ) THEN
             RAISE(ABORT, 'There is no model by that name.')
           WHEN ((NEW.imageable_type = 'Member') AND NOT EXISTS (SELECT id FROM members WHERE id = NEW.imageable_id)) THEN
             RAISE(ABORT, 'There is no Member with that id.')
@@ -189,7 +189,7 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
       BEFORE UPDATE ON pictures
       BEGIN
         SELECT CASE
-          WHEN (NEW.imageable_type != 'Member' AND NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' ) THEN
+          WHEN ( NEW.imageable_type != 'Member' AND NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' ) THEN
             RAISE(ABORT, 'There is no model by that name.')
           WHEN ((NEW.imageable_type = 'Member') AND NOT EXISTS (SELECT id FROM members WHERE id = NEW.imageable_id)) THEN
             RAISE(ABORT, 'There is no Member with that id.')
@@ -208,7 +208,7 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
       BEFORE INSERT ON pictures
       BEGIN
         SELECT CASE
-          WHEN (NEW.imageable_type != 'Employee' ) THEN
+          WHEN ( NEW.imageable_type != 'Employee' ) THEN
             RAISE(ABORT, 'There is no model by that name.')
           WHEN ((NEW.imageable_type = 'Employee') AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id)) THEN
             RAISE(ABORT, 'There is no Employee with that id.')
@@ -223,7 +223,7 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
       BEFORE UPDATE ON pictures
       BEGIN
         SELECT CASE
-          WHEN (NEW.imageable_type != 'Employee' ) THEN
+          WHEN ( NEW.imageable_type != 'Employee' ) THEN
             RAISE(ABORT, 'There is no model by that name.')
           WHEN ((NEW.imageable_type = 'Employee') AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id)) THEN
             RAISE(ABORT, 'There is no Employee with that id.')

@@ -49,21 +49,30 @@ module PolymorphicConstraints
       private
 
       def drop_trigger(relation, action)
-        strip_non_essential_spaces "DROP TRIGGER IF EXISTS check_#{relation}_#{action}_integrity;"
+        sql = <<-SQL
+          DROP TRIGGER IF EXISTS check_#{relation}_#{action}_integrity;
+        SQL
+
+        strip_non_essential_spaces(sql)
       end
 
       def drop_delete_trigger(relation, polymorphic_model)
         table_name = polymorphic_model.to_s.classify.constantize.table_name
-        strip_non_essential_spaces "DROP TRIGGER IF EXISTS check_#{relation}_#{table_name}_delete_integrity;"
+
+        sql = <<-SQL
+          DROP TRIGGER IF EXISTS check_#{relation}_#{table_name}_delete_integrity;
+        SQL
+
+        strip_non_essential_spaces(sql)
       end
 
       def generate_insert_constraints(relation, associated_table, polymorphic_models)
         associated_table = associated_table.to_s
 
-        sql = %{
+        sql = <<-SQL
           CREATE TRIGGER check_#{relation}_insert_integrity
             BEFORE INSERT ON #{associated_table}
-        }
+        SQL
 
         sql << common_upsert_sql(relation, polymorphic_models)
 
@@ -73,10 +82,10 @@ module PolymorphicConstraints
       def generate_update_constraints(relation, associated_table, polymorphic_models)
         associated_table = associated_table.to_s
 
-        sql = %{
+        sql = <<-SQL
           CREATE TRIGGER check_#{relation}_update_integrity
             BEFORE UPDATE ON #{associated_table}
-        }
+        SQL
 
         sql << common_upsert_sql(relation, polymorphic_models)
 
@@ -87,7 +96,7 @@ module PolymorphicConstraints
         associated_table = associated_table.to_s
         polymorphic_model = polymorphic_model.to_s
 
-        sql = %{
+        sql = <<-SQL
           CREATE TRIGGER check_#{relation}_#{polymorphic_model.classify.constantize.table_name}_delete_integrity
             BEFORE DELETE ON #{polymorphic_model.classify.constantize.table_name}
             FOR EACH ROW
@@ -101,7 +110,7 @@ module PolymorphicConstraints
                                       You must delete those records of table #{associated_table} first.';
               END IF;
             END;
-        }
+        SQL
 
         strip_non_essential_spaces(sql)
       end
@@ -109,36 +118,45 @@ module PolymorphicConstraints
       def common_upsert_sql(relation, polymorphic_models)
         polymorphic_models = polymorphic_models.map(&:to_s)
 
-        sql = %{
+        sql = <<-SQL
           FOR EACH ROW
           BEGIN
             IF
-        }
+        SQL
 
         polymorphic_models.each do |polymorphic_model|
-          sql << %{NEW.#{relation}_type != '#{polymorphic_model.classify}' }
-          sql << 'AND ' unless polymorphic_model == polymorphic_models.last
+          sql << <<-SQL
+            NEW.#{relation}_type != '#{polymorphic_model.classify}'
+          SQL
+
+          unless polymorphic_model == polymorphic_models.last
+            sql << <<-SQL
+              AND
+            SQL
+          end
         end
 
-        sql << %{ THEN SIGNAL SQLSTATE '45000'
-                    SET MESSAGE_TEXT = 'There is no model by that name.'; }
+        sql << <<-SQL
+          THEN SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'There is no model by that name.';
+        SQL
 
 
         polymorphic_models.each do |polymorphic_model|
-          sql << %{
+          sql << <<-SQL
             ELSEIF NEW.#{relation}_type = '#{polymorphic_model.classify}' AND
                    NOT EXISTS (SELECT id FROM #{polymorphic_model.classify.constantize.table_name}
                                WHERE id = NEW.#{relation}_id) THEN
 
               SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'There is no #{polymorphic_model.classify} with that id.';
-          }
+          SQL
         end
 
-        sql << %{
+        sql << <<-SQL
             END IF;
           END;
-        }
+        SQL
       end
     end
   end
