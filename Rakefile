@@ -76,13 +76,6 @@ end
 
 namespace :test do
   namespace :unit do
-    task :postgresql do
-      RSpec::Core::RakeTask.new(:postgresql) do |t|
-        t.pattern = 'spec/lib/polymorphic_constraints/connection_adapters/postgresql_adapter_spec.rb'
-      end
-      Rake::Task['postgresql'].execute
-    end
-
     task :sqlite do
       RSpec::Core::RakeTask.new(:sqlite) do |t|
         t.pattern = 'spec/lib/polymorphic_constraints/connection_adapters/sqlite3_adapter_spec.rb'
@@ -90,7 +83,21 @@ namespace :test do
       Rake::Task['sqlite'].execute
     end
 
-    task :all => [:postgresql, :sqlite]
+    task :postgresql do
+      RSpec::Core::RakeTask.new(:postgresql) do |t|
+        t.pattern = 'spec/lib/polymorphic_constraints/connection_adapters/postgresql_adapter_spec.rb'
+      end
+      Rake::Task['postgresql'].execute
+    end
+
+    task :mysql do
+      RSpec::Core::RakeTask.new(:mysql) do |t|
+        t.pattern = 'spec/lib/polymorphic_constraints/connection_adapters/mysql2_adapter_spec.rb'
+      end
+      Rake::Task['mysql'].execute
+    end
+
+    task :all => [:sqlite, :postgresql, :mysql]
   end
 
   namespace :integration do
