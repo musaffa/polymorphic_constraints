@@ -15,6 +15,11 @@ module PolymorphicConstraints
 
         PolymorphicConstraints::Adapter.load!
       end
+
+      ActiveSupport.on_load :action_controller do
+        require 'polymorphic_constraints/utils/error_handler'
+        include PolymorphicConstraints::Utils::ErrorHandler
+      end
     end
   end
 end
