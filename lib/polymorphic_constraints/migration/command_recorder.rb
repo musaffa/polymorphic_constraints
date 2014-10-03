@@ -10,8 +10,8 @@ module PolymorphicConstraints
       end
 
       def invert_add_polymorphic_constraints(args)
-        relation, associated_model, opts = *args
-        [:remove_polymorphic_constraints, relation]
+        relation, associated_model, options = *args
+        [:remove_polymorphic_constraints, relation, options]
       end
     end
   end
