@@ -87,11 +87,11 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
       BEGIN
         SELECT CASE
           WHEN ( NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' ) THEN
-            RAISE(ABORT, 'There is no model by that name.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.')
           WHEN ((NEW.imageable_type = 'Employee') AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id)) THEN
-            RAISE(ABORT, 'There is no Employee with that id.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No Employee with that id.')
           WHEN ((NEW.imageable_type = 'Product') AND NOT EXISTS (SELECT id FROM products WHERE id = NEW.imageable_id)) THEN
-            RAISE(ABORT, 'There is no Product with that id.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No Product with that id.')
         END;
       END;
     })
@@ -106,11 +106,11 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
       BEGIN
         SELECT CASE
           WHEN ( NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' ) THEN
-            RAISE(ABORT, 'There is no model by that name.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.')
           WHEN ((NEW.imageable_type = 'Employee') AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id)) THEN
-            RAISE(ABORT, 'There is no Employee with that id.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No Employee with that id.')
           WHEN ((NEW.imageable_type = 'Product') AND NOT EXISTS (SELECT id FROM products WHERE id = NEW.imageable_id)) THEN
-            RAISE(ABORT, 'There is no Product with that id.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No Product with that id.')
         END;
       END;
     })
@@ -125,7 +125,8 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
         BEGIN
           SELECT CASE
             WHEN EXISTS (SELECT id FROM pictures WHERE imageable_type = 'Member' AND imageable_id = OLD.id) THEN
-              RAISE(ABORT, 'There are records in the pictures table that refer to the table members.
+              RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic reference exists.
+                            There are records in the pictures table that refer to the table members.
                             You must delete those records of table pictures first.')
           END;
         END;
@@ -141,7 +142,8 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
         BEGIN
           SELECT CASE
             WHEN EXISTS (SELECT id FROM pictures WHERE imageable_type = 'Employee' AND imageable_id = OLD.id) THEN
-              RAISE(ABORT, 'There are records in the pictures table that refer to the table employees.
+              RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic reference exists.
+                            There are records in the pictures table that refer to the table employees.
                             You must delete those records of table pictures first.')
           END;
         END;
@@ -157,7 +159,8 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
         BEGIN
           SELECT CASE
             WHEN EXISTS (SELECT id FROM pictures WHERE imageable_type = 'Product' AND imageable_id = OLD.id) THEN
-              RAISE(ABORT, 'There are records in the pictures table that refer to the table products.
+              RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic reference exists.
+                            There are records in the pictures table that refer to the table products.
                             You must delete those records of table pictures first.')
           END;
         END;
@@ -171,13 +174,13 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
       BEGIN
         SELECT CASE
           WHEN ( NEW.imageable_type != 'Member' AND NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' ) THEN
-            RAISE(ABORT, 'There is no model by that name.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.')
           WHEN ((NEW.imageable_type = 'Member') AND NOT EXISTS (SELECT id FROM members WHERE id = NEW.imageable_id)) THEN
-            RAISE(ABORT, 'There is no Member with that id.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No Member with that id.')
           WHEN ((NEW.imageable_type = 'Employee') AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id)) THEN
-            RAISE(ABORT, 'There is no Employee with that id.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No Employee with that id.')
           WHEN ((NEW.imageable_type = 'Product') AND NOT EXISTS (SELECT id FROM products WHERE id = NEW.imageable_id)) THEN
-            RAISE(ABORT, 'There is no Product with that id.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No Product with that id.')
         END;
       END;
     })
@@ -190,13 +193,13 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
       BEGIN
         SELECT CASE
           WHEN ( NEW.imageable_type != 'Member' AND NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' ) THEN
-            RAISE(ABORT, 'There is no model by that name.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.')
           WHEN ((NEW.imageable_type = 'Member') AND NOT EXISTS (SELECT id FROM members WHERE id = NEW.imageable_id)) THEN
-            RAISE(ABORT, 'There is no Member with that id.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No Member with that id.')
           WHEN ((NEW.imageable_type = 'Employee') AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id)) THEN
-            RAISE(ABORT, 'There is no Employee with that id.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No Employee with that id.')
           WHEN ((NEW.imageable_type = 'Product') AND NOT EXISTS (SELECT id FROM products WHERE id = NEW.imageable_id)) THEN
-            RAISE(ABORT, 'There is no Product with that id.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No Product with that id.')
         END;
       END;
     })
@@ -209,9 +212,9 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
       BEGIN
         SELECT CASE
           WHEN ( NEW.imageable_type != 'Employee' ) THEN
-            RAISE(ABORT, 'There is no model by that name.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.')
           WHEN ((NEW.imageable_type = 'Employee') AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id)) THEN
-            RAISE(ABORT, 'There is no Employee with that id.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No Employee with that id.')
         END;
       END;
     })
@@ -224,9 +227,9 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
       BEGIN
         SELECT CASE
           WHEN ( NEW.imageable_type != 'Employee' ) THEN
-            RAISE(ABORT, 'There is no model by that name.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.')
           WHEN ((NEW.imageable_type = 'Employee') AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id)) THEN
-            RAISE(ABORT, 'There is no Employee with that id.')
+            RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No Employee with that id.')
         END;
       END;
     })

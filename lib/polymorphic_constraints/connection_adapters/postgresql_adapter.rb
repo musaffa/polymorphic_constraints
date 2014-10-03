@@ -61,7 +61,8 @@ module PolymorphicConstraints
 
         sql << <<-SQL
             ELSE
-              RAISE EXCEPTION ''No % model with id %.'', NEW.#{relation}_type, NEW.#{relation}_id;
+              RAISE EXCEPTION ''Polymorphic Constraints error. Polymorphic record not found.
+                                No % model with id %.'', NEW.#{relation}_type, NEW.#{relation}_id;
               RETURN NULL;
             END IF;
           END'
@@ -94,7 +95,8 @@ module PolymorphicConstraints
                            WHERE #{relation}_type = ''#{polymorphic_models[0].classify}''
                            AND #{relation}_id = OLD.id) THEN
 
-                  RAISE EXCEPTION ''There are records in #{associated_table} that refer to the table % with id %.
+                  RAISE EXCEPTION ''Polymorphic Constraints error. Polymorphic reference exists.
+                                    There are records in #{associated_table} that refer to the table % with id %.
                                     You must delete those records of table #{associated_table} first.'', TG_TABLE_NAME, OLD.id;
                   RETURN NULL;
         SQL
@@ -106,7 +108,8 @@ module PolymorphicConstraints
                            WHERE #{relation}_type = ''#{polymorphic_model.classify}''
                            AND #{relation}_id = OLD.id) THEN
 
-              RAISE EXCEPTION ''There are records in #{associated_table} that refer to the table % with id %.
+              RAISE EXCEPTION ''Polymorphic Constraints error. Polymorphic reference exists.
+                                There are records in #{associated_table} that refer to the table % with id %.
                                 You must delete those records of table #{associated_table} first.'', TG_TABLE_NAME, OLD.id;
               RETURN NULL;
           SQL

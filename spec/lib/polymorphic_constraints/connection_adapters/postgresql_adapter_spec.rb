@@ -61,7 +61,8 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
             RETURN NEW;
 
           ELSE
-            RAISE EXCEPTION ''No % model with id %.'', NEW.imageable_type, NEW.imageable_id;
+            RAISE EXCEPTION ''Polymorphic Constraints error. Polymorphic record not found.
+                              No % model with id %.'', NEW.imageable_type, NEW.imageable_id;
             RETURN NULL;
           END IF;
         END'
@@ -85,7 +86,8 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
              EXISTS (SELECT id FROM pictures
                      WHERE imageable_type = ''Employee'' AND imageable_id = OLD.id) THEN
 
-            RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
+            RAISE EXCEPTION ''Polymorphic Constraints error. Polymorphic reference exists.
+                              There are records in pictures that refer to the table % with id %.
                               You must delete those records of table pictures first.'', TG_TABLE_NAME, OLD.id;
             RETURN NULL;
 
@@ -93,7 +95,8 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
                  EXISTS (SELECT id FROM pictures
                          WHERE imageable_type = ''Product'' AND imageable_id = OLD.id) THEN
 
-            RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
+            RAISE EXCEPTION ''Polymorphic Constraints error. Polymorphic reference exists.
+                              There are records in pictures that refer to the table % with id %.
                               You must delete those records of table pictures first.'', TG_TABLE_NAME, OLD.id;
             RETURN NULL;
 
@@ -133,7 +136,8 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
             RETURN NEW;
 
           ELSE
-            RAISE EXCEPTION ''No % model with id %.'', NEW.imageable_type, NEW.imageable_id;
+            RAISE EXCEPTION ''Polymorphic Constraints error. Polymorphic record not found.
+                              No % model with id %.'', NEW.imageable_type, NEW.imageable_id;
             RETURN NULL;
           END IF;
         END'
@@ -157,7 +161,8 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
              EXISTS (SELECT id FROM pictures
                      WHERE imageable_type = ''Member'' AND imageable_id = OLD.id) THEN
 
-            RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
+            RAISE EXCEPTION ''Polymorphic Constraints error. Polymorphic reference exists.
+                              There are records in pictures that refer to the table % with id %.
                               You must delete those records of table pictures first.'', TG_TABLE_NAME, OLD.id;
             RETURN NULL;
 
@@ -165,7 +170,8 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
                  EXISTS (SELECT id FROM pictures
                          WHERE imageable_type = ''Employee'' AND imageable_id = OLD.id) THEN
 
-            RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
+            RAISE EXCEPTION ''Polymorphic Constraints error. Polymorphic reference exists.
+                              There are records in pictures that refer to the table % with id %.
                               You must delete those records of table pictures first.'', TG_TABLE_NAME, OLD.id;
             RETURN NULL;
 
@@ -173,7 +179,8 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
                  EXISTS (SELECT id FROM pictures
                          WHERE imageable_type = ''Product'' AND imageable_id = OLD.id) THEN
 
-            RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
+            RAISE EXCEPTION ''Polymorphic Constraints error. Polymorphic reference exists.
+                              There are records in pictures that refer to the table % with id %.
                               You must delete those records of table pictures first.'', TG_TABLE_NAME, OLD.id;
             RETURN NULL;
 
@@ -209,7 +216,8 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
             RETURN NEW;
 
           ELSE
-            RAISE EXCEPTION ''No % model with id %.'', NEW.imageable_type, NEW.imageable_id;
+            RAISE EXCEPTION ''Polymorphic Constraints error. Polymorphic record not found.
+                              No % model with id %.'', NEW.imageable_type, NEW.imageable_id;
             RETURN NULL;
           END IF;
         END'
@@ -233,7 +241,8 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
              EXISTS (SELECT id FROM pictures
                      WHERE imageable_type = ''Employee'' AND imageable_id = OLD.id) THEN
 
-            RAISE EXCEPTION ''There are records in pictures that refer to the table % with id %.
+            RAISE EXCEPTION ''Polymorphic Constraints error. Polymorphic reference exists.
+                              There are records in pictures that refer to the table % with id %.
                               You must delete those records of table pictures first.'', TG_TABLE_NAME, OLD.id;
             RETURN NULL;
 

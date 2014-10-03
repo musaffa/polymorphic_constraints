@@ -88,13 +88,13 @@ describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
       BEGIN
         IF NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no model by that name.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.';
         ELSEIF NEW.imageable_type = 'Employee' AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no Employee with that id.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Employee with that id.';
         ELSEIF NEW.imageable_type = 'Product' AND NOT EXISTS (SELECT id FROM products WHERE id = NEW.imageable_id) THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no Product with that id.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Product with that id.';
         END IF;
       END;
     })
@@ -110,13 +110,13 @@ describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
       BEGIN
         IF NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no model by that name.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.';
         ELSEIF NEW.imageable_type = 'Employee' AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no Employee with that id.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Employee with that id.';
         ELSEIF NEW.imageable_type = 'Product' AND NOT EXISTS (SELECT id FROM products WHERE id = NEW.imageable_id) THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no Product with that id.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Product with that id.';
         END IF;
       END;
     })
@@ -134,7 +134,8 @@ describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
                      WHERE imageable_type = 'Member'
                      AND imageable_id = OLD.id) THEN
             SIGNAL SQLSTATE '45000'
-              SET MESSAGE_TEXT = 'There are records in the pictures table that refer to the table members.
+              SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic reference exists.
+                                  There are records in the pictures table that refer to the table members.
                                   You must delete those records of table pictures first.';
           END IF;
         END;
@@ -153,7 +154,8 @@ describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
                      WHERE imageable_type = 'Employee'
                      AND imageable_id = OLD.id) THEN
             SIGNAL SQLSTATE '45000'
-              SET MESSAGE_TEXT = 'There are records in the pictures table that refer to the table employees.
+              SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic reference exists.
+                                  There are records in the pictures table that refer to the table employees.
                                   You must delete those records of table pictures first.';
           END IF;
         END;
@@ -172,7 +174,8 @@ describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
                      WHERE imageable_type = 'Product'
                      AND imageable_id = OLD.id) THEN
             SIGNAL SQLSTATE '45000'
-              SET MESSAGE_TEXT = 'There are records in the pictures table that refer to the table products.
+              SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic reference exists.
+                                  There are records in the pictures table that refer to the table products.
                                   You must delete those records of table pictures first.';
           END IF;
         END;
@@ -187,16 +190,16 @@ describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
       BEGIN
         IF NEW.imageable_type != 'Member' AND NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no model by that name.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.';
         ELSEIF NEW.imageable_type = 'Member' AND NOT EXISTS (SELECT id FROM members WHERE id = NEW.imageable_id) THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no Member with that id.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Member with that id.';
         ELSEIF NEW.imageable_type = 'Employee' AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no Employee with that id.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Employee with that id.';
         ELSEIF NEW.imageable_type = 'Product' AND NOT EXISTS (SELECT id FROM products WHERE id = NEW.imageable_id) THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no Product with that id.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Product with that id.';
         END IF;
       END;
     })
@@ -210,16 +213,16 @@ describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
       BEGIN
         IF NEW.imageable_type != 'Member' AND NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no model by that name.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.';
         ELSEIF NEW.imageable_type = 'Member' AND NOT EXISTS (SELECT id FROM members WHERE id = NEW.imageable_id) THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no Member with that id.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Member with that id.';
         ELSEIF NEW.imageable_type = 'Employee' AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no Employee with that id.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Employee with that id.';
         ELSEIF NEW.imageable_type = 'Product' AND NOT EXISTS (SELECT id FROM products WHERE id = NEW.imageable_id) THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no Product with that id.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Product with that id.';
         END IF;
       END;
     })
@@ -233,10 +236,10 @@ describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
       BEGIN
         IF NEW.imageable_type != 'Employee' THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no model by that name.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.';
         ELSEIF NEW.imageable_type = 'Employee' AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no Employee with that id.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Employee with that id.';
         END IF;
       END;
     })
@@ -250,10 +253,10 @@ describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
       BEGIN
         IF NEW.imageable_type != 'Employee' THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no model by that name.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.';
         ELSEIF NEW.imageable_type = 'Employee' AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
           SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'There is no Employee with that id.';
+            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Employee with that id.';
         END IF;
       END;
     })

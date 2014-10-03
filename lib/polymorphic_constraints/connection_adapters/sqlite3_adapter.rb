@@ -105,7 +105,8 @@ module PolymorphicConstraints
                 WHEN EXISTS (SELECT id FROM #{associated_table}
                              WHERE #{relation}_type = '#{polymorphic_model.classify}'
                              AND #{relation}_id = OLD.id) THEN
-                  RAISE(ABORT, 'There are records in the #{associated_table} table that refer to the
+                  RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic reference exists.
+                                There are records in the #{associated_table} table that refer to the
                                 table #{polymorphic_model.classify.constantize.table_name}.
                                 You must delete those records of table #{associated_table} first.')
               END;
@@ -140,7 +141,7 @@ module PolymorphicConstraints
         end
 
         sql << <<-SQL
-          ) THEN RAISE(ABORT, 'There is no model by that name.')
+          ) THEN RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.')
         SQL
 
         polymorphic_models.each do |polymorphic_model|
@@ -148,7 +149,8 @@ module PolymorphicConstraints
             WHEN ((NEW.#{relation}_type = '#{polymorphic_model.classify}') AND
                   NOT EXISTS (SELECT id FROM #{polymorphic_model.classify.constantize.table_name}
                               WHERE id = NEW.#{relation}_id)) THEN
-              RAISE(ABORT, 'There is no #{polymorphic_model.classify} with that id.')
+              RAISE(ABORT, 'Polymorphic Constraints error. Polymorphic record not found.
+                            No #{polymorphic_model.classify} with that id.')
           SQL
         end
 
