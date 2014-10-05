@@ -13,6 +13,6 @@ class PolymorphicTables < ActiveRecord::Migration
       t.timestamps
     end
 
-    add_polymorphic_constraints :imageable, :pictures
+    add_polymorphic_constraints :imageable, :pictures, polymorphic_models: [:product]
   end
 end

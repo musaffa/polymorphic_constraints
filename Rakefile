@@ -68,6 +68,7 @@ end
 
 def migrate_db
   PolymorphicTables.new.change
+  UpdateConstraints.new.change
 end
 
 
@@ -109,6 +110,7 @@ namespace :test do
   namespace :integration do
     require_relative 'spec/dummy/config/environment'
     require_relative 'spec/dummy/db/migrate/20141002195532_polymorphic_tables'
+    require_relative 'spec/dummy/db/migrate/20141005192259_update_constraints'
 
     task :sqlite do
       RSpec::Core::RakeTask.new(:sqlite) do |t|
