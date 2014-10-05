@@ -1,6 +1,6 @@
 module PolymorphicConstraints
   module Utils
-    module ModelFinder
+    module PolymorphicModelFinder
       def get_polymorphic_models(relation, search_strategy)
         search_strategy == :models_directory ? get_models_from_directory(relation) : get_active_record_descendents(relation)
       end

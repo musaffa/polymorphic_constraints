@@ -1,12 +1,12 @@
 require 'active_support/inflector'
 require_relative '../utils/sql_string'
-require_relative '../utils/model_finder'
+require_relative '../utils/polymorphic_model_finder'
 
 module PolymorphicConstraints
   module ConnectionAdapters
     module SQLite3Adapter
       include PolymorphicConstraints::Utils::SqlString
-      include PolymorphicConstraints::Utils::ModelFinder
+      include PolymorphicConstraints::Utils::PolymorphicModelFinder
 
       def supports_polymorphic_constraints?
         true
