@@ -1,6 +1,5 @@
 require 'active_support/all'
 
-
 module PolymorphicConstraints
   extend ActiveSupport::Autoload
   autoload :Adapter
