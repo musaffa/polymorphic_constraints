@@ -1,6 +1,6 @@
 module PolymorphicConstraints
   module Utils
-    module ErrorHandler
+    module PolymorphicErrorHandler
       extend ActiveSupport::Concern
 
       included do

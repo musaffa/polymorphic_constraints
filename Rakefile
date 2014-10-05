@@ -25,11 +25,13 @@ end
 SQLITE3_FILE_PATH = 'spec/dummy/db/test.sqlite3'
 
 def sqlite3_db
+  prepare_database_config('sqlite')
   File.delete(SQLITE3_FILE_PATH) if File.exists?(SQLITE3_FILE_PATH)
   SQLite3::Database.new SQLITE3_FILE_PATH
 end
 
 def postgres_db
+  prepare_database_config('postgresql')
   pg_connection_config = connection_config
 
   begin
@@ -45,6 +47,7 @@ def postgres_db
 end
 
 def mysql_db
+  prepare_database_config('mysql')
   mysql_connection_config = connection_config
 
   begin
@@ -67,14 +70,10 @@ def migrate_db
   PolymorphicTables.new.change
 end
 
-task :environment, :adapter do |t, args|
-  ENV['RAILS_ENV'] ||= 'test'
-  prepare_database_config(args.adapter)
-  require_relative 'spec/dummy/config/environment'
-  require_relative 'spec/dummy/db/migrate/20141002195532_polymorphic_tables'
-end
 
 namespace :test do
+  ENV['RAILS_ENV'] ||= 'test'
+
   namespace :unit do
     task :sqlite do
       RSpec::Core::RakeTask.new(:sqlite) do |t|
@@ -97,13 +96,21 @@ namespace :test do
       Rake::Task['mysql'].execute
     end
 
-    task :all => [:sqlite, :postgresql, :mysql]
+    task :error_handler do
+      RSpec::Core::RakeTask.new(:error_handler) do |t|
+        t.pattern = 'spec/lib/polymorphic_constraints/utils/polymorphic_error_handler_spec.rb'
+      end
+      Rake::Task['error_handler'].execute
+    end
+
+    task :all => [:sqlite, :postgresql, :mysql, :error_handler]
   end
 
   namespace :integration do
-    task :sqlite do
-      task(:environment).invoke('sqlite')
+    require_relative 'spec/dummy/config/environment'
+    require_relative 'spec/dummy/db/migrate/20141002195532_polymorphic_tables'
 
+    task :sqlite do
       RSpec::Core::RakeTask.new(:sqlite) do |t|
         t.pattern = 'spec/integration/active_record_integration_spec.rb'
       end
@@ -116,8 +123,6 @@ namespace :test do
     end
 
     task :postgresql do
-      task(:environment).invoke('postgresql')
-
       RSpec::Core::RakeTask.new(:postgresql) do |t|
         t.pattern = 'spec/integration/active_record_integration_spec.rb'
       end
@@ -130,8 +135,6 @@ namespace :test do
     end
 
     task :mysql do
-      task(:environment).invoke('mysql')
-
       RSpec::Core::RakeTask.new(:mysql) do |t|
         t.pattern = 'spec/integration/active_record_integration_spec.rb'
       end
