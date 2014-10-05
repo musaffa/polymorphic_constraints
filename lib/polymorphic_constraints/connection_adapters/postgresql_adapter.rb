@@ -24,7 +24,7 @@ module PolymorphicConstraints
         statements.each { |statement| execute statement }
       end
 
-      def remove_polymorphic_constraints(relation, options = {})
+      def remove_polymorphic_constraints(relation)
         statement = drop_constraints(relation)
         execute statement
       end
