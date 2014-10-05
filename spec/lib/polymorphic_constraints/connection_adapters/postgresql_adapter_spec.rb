@@ -21,19 +21,22 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
   describe 'add constraints' do
     context 'search strategy' do
       it 'defaults to active_record_descendants search strategy' do
-        expect(subject.add_polymorphic_constraints(:imageable, :pictures)).to eql([upsert_triggers_sql_with_member,
+        expect(subject.add_polymorphic_constraints(:imageable, :pictures)).to eql([drop_triggers_sql,
+                                                                                   upsert_triggers_sql_with_member,
                                                                                    delete_triggers_sql_with_member])
       end
 
       it 'returns expected add constraints with models_directory search strategy' do
         expect(subject.add_polymorphic_constraints(:imageable, :pictures,
-                                                   search_strategy: :models_directory)).to eql([upsert_triggers_sql,
+                                                   search_strategy: :models_directory)).to eql([drop_triggers_sql,
+                                                                                                upsert_triggers_sql,
                                                                                                 delete_triggers_sql])
       end
 
       it 'returns expected add constraints sql with polymorphic model options' do
         expect(subject.add_polymorphic_constraints(:imageable, :pictures,
-                                                   polymorphic_models: [:employee])).to eql([upsert_triggers_sql_only_employee,
+                                                   polymorphic_models: [:employee])).to eql([drop_triggers_sql,
+                                                                                             upsert_triggers_sql_only_employee,
                                                                                              delete_triggers_sql_only_employee])
       end
     end
@@ -47,9 +50,6 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
 
   let(:upsert_triggers_sql) do
     subject.strip_non_essential_spaces(%{
-      DROP FUNCTION IF EXISTS check_imageable_upsert_integrity()
-        CASCADE;
-
       CREATE FUNCTION check_imageable_upsert_integrity() RETURNS TRIGGER AS '
         BEGIN
           IF NEW.imageable_type = ''Employee'' AND
@@ -76,9 +76,6 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
 
   let(:delete_triggers_sql) do
     subject.strip_non_essential_spaces(%{
-      DROP FUNCTION IF EXISTS check_imageable_delete_integrity()
-        CASCADE;
-
       CREATE FUNCTION check_imageable_delete_integrity()
       RETURNS TRIGGER AS '
         BEGIN
@@ -118,9 +115,6 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
 
   let(:upsert_triggers_sql_with_member) do
     subject.strip_non_essential_spaces(%{
-      DROP FUNCTION IF EXISTS check_imageable_upsert_integrity()
-        CASCADE;
-
       CREATE FUNCTION check_imageable_upsert_integrity() RETURNS TRIGGER AS '
         BEGIN
           IF NEW.imageable_type = ''Member'' AND
@@ -151,9 +145,6 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
 
   let(:delete_triggers_sql_with_member) do
     subject.strip_non_essential_spaces(%{
-      DROP FUNCTION IF EXISTS check_imageable_delete_integrity()
-        CASCADE;
-
       CREATE FUNCTION check_imageable_delete_integrity()
       RETURNS TRIGGER AS '
         BEGIN
@@ -206,9 +197,6 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
 
   let(:upsert_triggers_sql_only_employee) do
     subject.strip_non_essential_spaces(%{
-      DROP FUNCTION IF EXISTS check_imageable_upsert_integrity()
-        CASCADE;
-
       CREATE FUNCTION check_imageable_upsert_integrity() RETURNS TRIGGER AS '
         BEGIN
           IF NEW.imageable_type = ''Employee'' AND
@@ -231,9 +219,6 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
 
   let(:delete_triggers_sql_only_employee) do
     subject.strip_non_essential_spaces(%{
-      DROP FUNCTION IF EXISTS check_imageable_delete_integrity()
-        CASCADE;
-
       CREATE FUNCTION check_imageable_delete_integrity()
       RETURNS TRIGGER AS '
         BEGIN

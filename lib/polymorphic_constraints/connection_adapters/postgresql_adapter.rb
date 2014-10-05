@@ -15,7 +15,9 @@ module PolymorphicConstraints
       def add_polymorphic_constraints(relation, associated_table, options = {})
         search_strategy = options.fetch(:search_strategy, :active_record_descendants)
         polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation, search_strategy) }
+
         statements = []
+        statements << drop_constraints(relation)
         statements << generate_upsert_constraints(relation, associated_table, polymorphic_models)
         statements << generate_delete_constraints(relation, associated_table, polymorphic_models)
 
@@ -36,11 +38,6 @@ module PolymorphicConstraints
         polymorphic_models = polymorphic_models.map(&:to_s)
 
         sql = <<-SQL
-          DROP FUNCTION IF EXISTS check_#{relation}_upsert_integrity()
-            CASCADE;
-        SQL
-
-        sql << <<-SQL
           CREATE FUNCTION check_#{relation}_upsert_integrity()
             RETURNS TRIGGER AS '
               BEGIN
@@ -84,11 +81,6 @@ module PolymorphicConstraints
         polymorphic_models = polymorphic_models.map(&:to_s)
 
         sql = <<-SQL
-          DROP FUNCTION IF EXISTS check_#{relation}_delete_integrity()
-            CASCADE;
-        SQL
-
-        sql << <<-SQL
           CREATE FUNCTION check_#{relation}_delete_integrity()
             RETURNS TRIGGER AS '
               BEGIN

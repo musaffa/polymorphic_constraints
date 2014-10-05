@@ -15,27 +15,27 @@ module PolymorphicConstraints
       def add_polymorphic_constraints(relation, associated_table, options = {})
         search_strategy = options.fetch(:search_strategy, :active_record_descendants)
         polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation, search_strategy) }
-        statements = []
 
-        statements << drop_trigger(relation, 'insert')
+        statements = constraints_remove_statements(relation)
         statements << generate_create_constraints(relation, associated_table, polymorphic_models)
-
-        statements << drop_trigger(relation, 'update')
         statements << generate_update_constraints(relation, associated_table, polymorphic_models)
 
         polymorphic_models.each do |polymorphic_model|
-          statements << drop_delete_trigger(relation, polymorphic_model)
           statements << generate_delete_constraints(relation, associated_table, polymorphic_model)
         end
 
         statements.each { |statement| execute statement }
       end
 
-      def remove_polymorphic_constraints(relation, options = {})
-        search_strategy = options.fetch(:search_strategy, :active_record_descendants)
-        polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation, search_strategy) }
-        statements = []
+      def remove_polymorphic_constraints(relation)
+        statements = constraints_remove_statements(relation)
+        statements.each { |statement| execute statement }
+      end
 
+      def constraints_remove_statements(relation)
+        polymorphic_models = get_polymorphic_models(relation, :active_record_descendants)
+
+        statements = []
         statements << drop_trigger(relation, 'insert')
         statements << drop_trigger(relation, 'update')
 
@@ -43,7 +43,7 @@ module PolymorphicConstraints
           statements << drop_delete_trigger(relation, polymorphic_model)
         end
 
-        statements.each { |statement| execute statement }
+        statements
       end
 
       alias_method :update_polymorphic_constraints, :add_polymorphic_constraints

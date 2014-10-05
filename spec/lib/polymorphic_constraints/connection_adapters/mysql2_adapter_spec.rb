@@ -22,36 +22,39 @@ describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
     context 'search strategy' do
       it 'defaults to active_record_descendants search strategy' do
         expect(subject.add_polymorphic_constraints(:imageable, :pictures)).to eql([drop_create_trigger_sql,
-                                                                                   create_trigger_sql_with_member,
                                                                                    drop_update_trigger_sql,
-                                                                                   update_trigger_sql_with_member,
                                                                                    drop_members_delete_trigger_sql,
-                                                                                   members_delete_trigger_sql,
                                                                                    drop_employees_delete_trigger_sql,
-                                                                                   employees_delete_trigger_sql,
                                                                                    drop_products_delete_trigger_sql,
+                                                                                   create_trigger_sql_with_member,
+                                                                                   update_trigger_sql_with_member,                                                                                 
+                                                                                   members_delete_trigger_sql,
+                                                                                   employees_delete_trigger_sql,
                                                                                    products_delete_trigger_sql])
       end
 
       it 'returns expected add constraints sql with models_directory search strategy' do
         expect(subject.add_polymorphic_constraints(:imageable, :pictures,
                                                    search_strategy: :models_directory)).to eql([drop_create_trigger_sql,
-                                                                                                create_trigger_sql,
                                                                                                 drop_update_trigger_sql,
-                                                                                                update_trigger_sql,
+                                                                                                drop_members_delete_trigger_sql,
                                                                                                 drop_employees_delete_trigger_sql,
-                                                                                                employees_delete_trigger_sql,
                                                                                                 drop_products_delete_trigger_sql,
+                                                                                                create_trigger_sql,
+                                                                                                update_trigger_sql,
+                                                                                                employees_delete_trigger_sql,
                                                                                                 products_delete_trigger_sql])
       end
 
       it 'returns expected add constraints sql with polymorphic model options' do
         expect(subject.add_polymorphic_constraints(:imageable, :pictures,
                                                    polymorphic_models: [:employee])).to eql([drop_create_trigger_sql,
-                                                                                             create_trigger_sql_only_employee,
                                                                                              drop_update_trigger_sql,
-                                                                                             update_trigger_sql_only_employee,
+                                                                                             drop_members_delete_trigger_sql,
                                                                                              drop_employees_delete_trigger_sql,
+                                                                                             drop_products_delete_trigger_sql,
+                                                                                             create_trigger_sql_only_employee,
+                                                                                             update_trigger_sql_only_employee,
                                                                                              employees_delete_trigger_sql])
       end
     end
@@ -66,14 +69,6 @@ describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
                                                                            drop_members_delete_trigger_sql,
                                                                            drop_employees_delete_trigger_sql,
                                                                            drop_products_delete_trigger_sql])
-      end
-
-      it 'returns expected drop constraints sql with models_directory search strategy' do
-        expect(subject.remove_polymorphic_constraints(:imageable,
-                                                      search_strategy: :models_directory)).to eql([drop_create_trigger_sql,
-                                                                                                   drop_update_trigger_sql,
-                                                                                                   drop_employees_delete_trigger_sql,
-                                                                                                   drop_products_delete_trigger_sql])
       end
     end
   end

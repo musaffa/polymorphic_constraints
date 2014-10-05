@@ -16,7 +16,7 @@ module PolymorphicConstraints
       def add_polymorphic_constraints(relation, associated_model, options = {})
       end
 
-      def remove_polymorphic_constraints(relation, options = {})
+      def remove_polymorphic_constraints(relation)
       end
     end
   end
