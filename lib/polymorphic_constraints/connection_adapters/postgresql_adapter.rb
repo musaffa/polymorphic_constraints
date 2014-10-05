@@ -27,6 +27,8 @@ module PolymorphicConstraints
         execute statement
       end
 
+      alias_method :update_polymorphic_constraints, :add_polymorphic_constraints
+
       private
 
       def generate_upsert_constraints(relation, associated_table, polymorphic_models)

@@ -46,6 +46,8 @@ module PolymorphicConstraints
         statements.each { |statement| execute statement }
       end
 
+      alias_method :update_polymorphic_constraints, :add_polymorphic_constraints
+
       private
 
       def drop_trigger(relation, action)
