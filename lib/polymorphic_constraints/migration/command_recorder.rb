@@ -13,6 +13,8 @@ module PolymorphicConstraints
         relation, associated_model, options = *args
         [:remove_polymorphic_constraints, relation, options]
       end
+
+      alias_method :update_polymorphic_constraints, :add_polymorphic_constraints
     end
   end
 end
