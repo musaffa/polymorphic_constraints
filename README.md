@@ -1,5 +1,7 @@
 # Polymorphic Constraints
 
+[![Build Status](https://travis-ci.org/musaffa/polymorphic_constraints.svg)](https://travis-ci.org/musaffa/polymorphic_constraints)
+
 Polymorphic Constraints gem introduces some methods to your migrations to help to maintain the referential integrity for your Rails polymorphic associations.
 
 It uses triggers to enforce the constraints. It enforces constraints on `insert`, `update` and `delete`. `update` and `delete` constraints works like the `:restrict` option of foreign key. 
