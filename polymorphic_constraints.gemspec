@@ -10,8 +10,8 @@ Gem::Specification.new do |s|
   s.authors     = ['Ahmad Musaffa']
   s.email       = ['musaffa_csemm@yahoo.com']
   s.homepage    = 'https://github.com/musaffa/polymorphic_constraints'
-  s.summary     = 'Database agnostic referential integrity enforcer for polymorphic association using triggers.'
-  s.description = 'Helps to maintain referential integrity for Rails polymorphic associations'
+  s.summary     = 'Database agnostic referential integrity enforcer for Rails polymorphic associations using triggers.'
+  s.description = 'Helps to maintain referential integrity for Rails polymorphic associations.'
   s.license     = 'MIT'
 
   s.files         = `git ls-files`.split($/)
