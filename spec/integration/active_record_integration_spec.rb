@@ -1,4 +1,10 @@
+require 'spec_helper'
+
 describe 'Active Record Integration' do
+  before :all do
+    ENV['db_adapter'] ||= 'sqlite'
+    send("setup_#{ENV['db_adapter']}")
+  end
 
   context 'insertion' do
     it 'raises an exception creating a polymorphic relation without a corresponding record' do
