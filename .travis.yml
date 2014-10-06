@@ -1,13 +1,7 @@
 language: ruby
 rvm:
   - 2.1.2
-  - 1.9.3
 gemfile:
   - gemfiles/Gemfile.rails-4.1
-  - gemfiles/Gemfile.rails-4.0
-  - gemfiles/Gemfile.rails-3.2
 script:
   - bundle exec rake test:unit:all
-  - bundle exec rake test:integration:sqlite
-  - bundle exec rake test:integration:postgresql
-  - bundle exec rake test:integration:mysql
