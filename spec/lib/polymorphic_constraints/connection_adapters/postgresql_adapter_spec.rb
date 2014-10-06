@@ -3,10 +3,6 @@ require 'polymorphic_constraints/connection_adapters/postgresql_adapter'
 
 describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
 
-  class Member < ActiveRecord::Base
-    has_many :pictures, as: :imageable, dependent: :destroy
-  end
-
   class TestAdapter
     include Support::AdapterHelper
     include PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter
@@ -22,15 +18,8 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
     context 'search strategy' do
       it 'defaults to active_record_descendants search strategy' do
         expect(subject.add_polymorphic_constraints(:imageable, :pictures)).to eql([drop_triggers_sql,
-                                                                                   upsert_triggers_sql_with_member,
-                                                                                   delete_triggers_sql_with_member])
-      end
-
-      it 'returns expected add constraints with models_directory search strategy' do
-        expect(subject.add_polymorphic_constraints(:imageable, :pictures,
-                                                   search_strategy: :models_directory)).to eql([drop_triggers_sql,
-                                                                                                upsert_triggers_sql,
-                                                                                                delete_triggers_sql])
+                                                                                   upsert_triggers_sql,
+                                                                                   delete_triggers_sql])
       end
 
       it 'returns expected add constraints sql with polymorphic model options' do
@@ -102,88 +91,6 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
           END IF;
         END'
       LANGUAGE plpgsql;
-
-      CREATE TRIGGER check_imageable_employees_delete_integrity_trigger
-        BEFORE DELETE ON employees
-        FOR EACH ROW EXECUTE PROCEDURE check_imageable_delete_integrity();
-
-      CREATE TRIGGER check_imageable_products_delete_integrity_trigger
-        BEFORE DELETE ON products
-        FOR EACH ROW EXECUTE PROCEDURE check_imageable_delete_integrity();
-    })
-  end
-
-  let(:upsert_triggers_sql_with_member) do
-    subject.strip_non_essential_spaces(%{
-      CREATE FUNCTION check_imageable_upsert_integrity() RETURNS TRIGGER AS '
-        BEGIN
-          IF NEW.imageable_type = ''Member'' AND
-             EXISTS (SELECT id FROM members WHERE id = NEW.imageable_id) THEN
-            RETURN NEW;
-
-          ELSEIF NEW.imageable_type = ''Employee'' AND
-                 EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
-            RETURN NEW;
-
-          ELSEIF NEW.imageable_type = ''Product'' AND
-                 EXISTS (SELECT id FROM products WHERE id = NEW.imageable_id) THEN
-            RETURN NEW;
-
-          ELSE
-            RAISE EXCEPTION ''Polymorphic Constraints error. Polymorphic record not found.
-                              No % model with id %.'', NEW.imageable_type, NEW.imageable_id;
-            RETURN NULL;
-          END IF;
-        END'
-      LANGUAGE plpgsql;
-
-      CREATE TRIGGER check_imageable_upsert_integrity_trigger
-        BEFORE INSERT OR UPDATE ON pictures
-        FOR EACH ROW EXECUTE PROCEDURE check_imageable_upsert_integrity();
-    })
-  end
-
-  let(:delete_triggers_sql_with_member) do
-    subject.strip_non_essential_spaces(%{
-      CREATE FUNCTION check_imageable_delete_integrity()
-      RETURNS TRIGGER AS '
-        BEGIN
-          IF TG_TABLE_NAME = ''members'' AND
-             EXISTS (SELECT id FROM pictures
-                     WHERE imageable_type = ''Member'' AND imageable_id = OLD.id) THEN
-
-            RAISE EXCEPTION ''Polymorphic Constraints error. Polymorphic reference exists.
-                              There are records in pictures that refer to the table % with id %.
-                              You must delete those records of table pictures first.'', TG_TABLE_NAME, OLD.id;
-            RETURN NULL;
-
-          ELSEIF TG_TABLE_NAME = ''employees'' AND
-                 EXISTS (SELECT id FROM pictures
-                         WHERE imageable_type = ''Employee'' AND imageable_id = OLD.id) THEN
-
-            RAISE EXCEPTION ''Polymorphic Constraints error. Polymorphic reference exists.
-                              There are records in pictures that refer to the table % with id %.
-                              You must delete those records of table pictures first.'', TG_TABLE_NAME, OLD.id;
-            RETURN NULL;
-
-          ELSEIF TG_TABLE_NAME = ''products'' AND
-                 EXISTS (SELECT id FROM pictures
-                         WHERE imageable_type = ''Product'' AND imageable_id = OLD.id) THEN
-
-            RAISE EXCEPTION ''Polymorphic Constraints error. Polymorphic reference exists.
-                              There are records in pictures that refer to the table % with id %.
-                              You must delete those records of table pictures first.'', TG_TABLE_NAME, OLD.id;
-            RETURN NULL;
-
-          ELSE
-            RETURN OLD;
-          END IF;
-        END'
-      LANGUAGE plpgsql;
-
-      CREATE TRIGGER check_imageable_members_delete_integrity_trigger
-        BEFORE DELETE ON members
-        FOR EACH ROW EXECUTE PROCEDURE check_imageable_delete_integrity();
 
       CREATE TRIGGER check_imageable_employees_delete_integrity_trigger
         BEFORE DELETE ON employees

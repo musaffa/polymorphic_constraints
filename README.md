@@ -19,6 +19,7 @@ Add the following to your Gemfile:
 ```ruby
 gem 'polymorphic_constraints'
 ```
+
 ## API Examples
 
 This gem adds the following methods to your migrations:
@@ -65,7 +66,6 @@ class CreateComments < ActiveRecord::Migration
   add_polymorphic_constraints :imageable, :pictures
 end
 ```
-
 For the second method to work properly, the polymorphic tables `employees` and `products` have to be in the database first i.e `pictures` migration should come after the migrations of `employees` and `products`.
 
 run: `rake db:migrate`
@@ -123,28 +123,21 @@ When you add polymorphic constraints like this:
 ```ruby
 add_polymorphic_constraints :imageable, :pictures
 ```
-
 the gem will search for models acting as imageable using `ActiveRecord::Base.descendants`. This will search all the models including your gems, models directory etc.
 
-Or if you want to search only standard app/models, then you can use `:models_directory` as the search strategy:
-```ruby
-add_polymorphic_constraints :imageable, :pictures, search_strategy: :models_directory
-```
-This will search only the models in the standard models directory.
-
-**Note:** `:models_directory` search strategy assumes all the model classes are named after their file names.
-
 You can also explicitly specify the models with which you want to create polymorphic constraints.
+
 ```ruby
 add_polymorphic_constraints :imageable, :pictures, polymorphic_models: [:employee]
 ```
-This will create polymorphic constraints only between `pictures` and `employees`. `:polymorphic_models` will supersede `:search_strategy`.
+This will create polymorphic constraints only between `pictures` and `employees`. `:polymorphic_models` will supersede `ActiveRecord::Base.descendants` search_strategy.
 
-**Note:** the polymorphic_models option is an array. The models specified in the array should be in singular form. Make sure the models indeed have the polymorphic relationship (in this example, `:employee` acting as `:imageable` with `:pictures`).
+**Note:** `:polymorphic_models` option requires an array. The models specified in the array should be in singular form. Make sure the models indeed have the polymorphic relationship (in this example, `:employee` acting as `:imageable` with `:pictures`).
 
 ## Update Constraints
 
 This gem creates triggers using the existing state of the application. If you add any model later or add new polymorphic relationships in the existing model, it wont have any polymorphic constraint applied to it. For example, if you add a member class later in the application life cycle:
+
 ```ruby
 class Member < ActiveRecord::Base
   has_many :pictures, as: :imageable, dependent: :destroy
@@ -159,7 +152,7 @@ class AgainUpdatePolymorphicConstraints < ActiveRecord::Migration
   end
 end
 ```
-This will delete all the existing `:imageable` constraints and create new ones. You can also specify `:search_strategy` and `:polymorphic_models` options with `update_polymorphic_constraints` method. See [Model Search Strategy](#model-search-strategy)
+This will delete all the existing `:imageable` constraints and create new ones. You can also specify `:polymorphic_models` options with `update_polymorphic_constraints` method. See [Model Search Strategy](#model-search-strategy)
 
 **Note:** `update_polymorphic_constraints` is simply an alias to `add_polymorphic_constraints`.
 
@@ -188,7 +181,7 @@ class AddPolymorphicConstraints < ActiveRecord::Migration
 end
 ```
 
-If you can also use `up` and `down` like this:
+You can also use `up` and `down` like this:
 
 ```ruby
 class AddPolymorphicConstraints < ActiveRecord::Migration

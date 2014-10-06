@@ -13,8 +13,7 @@ module PolymorphicConstraints
       end
 
       def add_polymorphic_constraints(relation, associated_table, options = {})
-        search_strategy = options.fetch(:search_strategy, :active_record_descendants)
-        polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation, search_strategy) }
+        polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation) }
 
         statements = constraints_remove_statements(relation)
         statements << generate_insert_constraints(relation, associated_table, polymorphic_models)
@@ -32,8 +31,12 @@ module PolymorphicConstraints
         statements.each { |statement| execute statement }
       end
 
+      alias_method :update_polymorphic_constraints, :add_polymorphic_constraints
+
+      private
+
       def constraints_remove_statements(relation)
-        polymorphic_models = get_polymorphic_models(relation, :active_record_descendants)
+        polymorphic_models = get_polymorphic_models(relation)
 
         statements = []
         statements << drop_trigger(relation, 'insert')
@@ -45,10 +48,6 @@ module PolymorphicConstraints
 
         statements
       end
-
-      alias_method :update_polymorphic_constraints, :add_polymorphic_constraints
-
-      private
 
       def drop_trigger(relation, action)
         sql = <<-SQL

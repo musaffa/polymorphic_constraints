@@ -13,8 +13,7 @@ module PolymorphicConstraints
       end
 
       def add_polymorphic_constraints(relation, associated_table, options = {})
-        search_strategy = options.fetch(:search_strategy, :active_record_descendants)
-        polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation, search_strategy) }
+        polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation) }
 
         statements = []
         statements << drop_constraints(relation)

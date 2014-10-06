@@ -3,10 +3,6 @@ require 'polymorphic_constraints/connection_adapters/mysql2_adapter'
 
 describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
 
-  class Member < ActiveRecord::Base
-    has_many :pictures, as: :imageable, dependent: :destroy
-  end
-
   class TestAdapter
     include Support::AdapterHelper
     include PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter
@@ -23,34 +19,18 @@ describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
       it 'defaults to active_record_descendants search strategy' do
         expect(subject.add_polymorphic_constraints(:imageable, :pictures)).to eql([drop_create_trigger_sql,
                                                                                    drop_update_trigger_sql,
-                                                                                   drop_members_delete_trigger_sql,
                                                                                    drop_employees_delete_trigger_sql,
                                                                                    drop_products_delete_trigger_sql,
-                                                                                   create_trigger_sql_with_member,
-                                                                                   update_trigger_sql_with_member,                                                                                 
-                                                                                   members_delete_trigger_sql,
+                                                                                   create_trigger_sql,
+                                                                                   update_trigger_sql,
                                                                                    employees_delete_trigger_sql,
                                                                                    products_delete_trigger_sql])
-      end
-
-      it 'returns expected add constraints sql with models_directory search strategy' do
-        expect(subject.add_polymorphic_constraints(:imageable, :pictures,
-                                                   search_strategy: :models_directory)).to eql([drop_create_trigger_sql,
-                                                                                                drop_update_trigger_sql,
-                                                                                                drop_members_delete_trigger_sql,
-                                                                                                drop_employees_delete_trigger_sql,
-                                                                                                drop_products_delete_trigger_sql,
-                                                                                                create_trigger_sql,
-                                                                                                update_trigger_sql,
-                                                                                                employees_delete_trigger_sql,
-                                                                                                products_delete_trigger_sql])
       end
 
       it 'returns expected add constraints sql with polymorphic model options' do
         expect(subject.add_polymorphic_constraints(:imageable, :pictures,
                                                    polymorphic_models: [:employee])).to eql([drop_create_trigger_sql,
                                                                                              drop_update_trigger_sql,
-                                                                                             drop_members_delete_trigger_sql,
                                                                                              drop_employees_delete_trigger_sql,
                                                                                              drop_products_delete_trigger_sql,
                                                                                              create_trigger_sql_only_employee,
@@ -66,7 +46,6 @@ describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
       it 'defaults to active_record_descendants search strategy' do
         expect(subject.remove_polymorphic_constraints(:imageable)).to eql([drop_create_trigger_sql,
                                                                            drop_update_trigger_sql,
-                                                                           drop_members_delete_trigger_sql,
                                                                            drop_employees_delete_trigger_sql,
                                                                            drop_products_delete_trigger_sql])
       end
@@ -74,68 +53,7 @@ describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
   end
 
   let(:drop_create_trigger_sql) { 'DROP TRIGGER IF EXISTS check_imageable_insert_integrity;' }
-
-  let(:create_trigger_sql) do
-    subject.strip_non_essential_spaces(%{
-      CREATE TRIGGER check_imageable_insert_integrity
-      BEFORE INSERT ON pictures
-      FOR EACH ROW
-      BEGIN
-        IF NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' THEN
-          SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.';
-        ELSEIF NEW.imageable_type = 'Employee' AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
-          SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Employee with that id.';
-        ELSEIF NEW.imageable_type = 'Product' AND NOT EXISTS (SELECT id FROM products WHERE id = NEW.imageable_id) THEN
-          SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Product with that id.';
-        END IF;
-      END;
-    })
-  end
-
   let(:drop_update_trigger_sql) { 'DROP TRIGGER IF EXISTS check_imageable_update_integrity;' }
-
-  let(:update_trigger_sql) do
-    subject.strip_non_essential_spaces(%{
-      CREATE TRIGGER check_imageable_update_integrity
-      BEFORE UPDATE ON pictures
-      FOR EACH ROW
-      BEGIN
-        IF NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' THEN
-          SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.';
-        ELSEIF NEW.imageable_type = 'Employee' AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
-          SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Employee with that id.';
-        ELSEIF NEW.imageable_type = 'Product' AND NOT EXISTS (SELECT id FROM products WHERE id = NEW.imageable_id) THEN
-          SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Product with that id.';
-        END IF;
-      END;
-    })
-  end
-
-  let(:drop_members_delete_trigger_sql) { 'DROP TRIGGER IF EXISTS check_imageable_members_delete_integrity;' }
-
-  let(:members_delete_trigger_sql) do
-    subject.strip_non_essential_spaces(%{
-      CREATE TRIGGER check_imageable_members_delete_integrity
-        BEFORE DELETE ON members
-        FOR EACH ROW
-        BEGIN
-          IF EXISTS (SELECT id FROM pictures
-                     WHERE imageable_type = 'Member'
-                     AND imageable_id = OLD.id) THEN
-            SIGNAL SQLSTATE '45000'
-              SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic reference exists.
-                                  There are records in the pictures table that refer to the table members.
-                                  You must delete those records of table pictures first.';
-          END IF;
-        END;
-    })
-  end
 
   let(:drop_employees_delete_trigger_sql) { 'DROP TRIGGER IF EXISTS check_imageable_employees_delete_integrity;' }
 
@@ -177,18 +95,15 @@ describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
     })
   end
 
-  let(:create_trigger_sql_with_member) do
+  let(:create_trigger_sql) do
     subject.strip_non_essential_spaces(%{
       CREATE TRIGGER check_imageable_insert_integrity
       BEFORE INSERT ON pictures
       FOR EACH ROW
       BEGIN
-        IF NEW.imageable_type != 'Member' AND NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' THEN
+        IF NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' THEN
           SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.';
-        ELSEIF NEW.imageable_type = 'Member' AND NOT EXISTS (SELECT id FROM members WHERE id = NEW.imageable_id) THEN
-          SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Member with that id.';
         ELSEIF NEW.imageable_type = 'Employee' AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
           SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Employee with that id.';
@@ -200,18 +115,15 @@ describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
     })
   end
 
-  let(:update_trigger_sql_with_member) do
+  let(:update_trigger_sql) do
     subject.strip_non_essential_spaces(%{
       CREATE TRIGGER check_imageable_update_integrity
       BEFORE UPDATE ON pictures
       FOR EACH ROW
       BEGIN
-        IF NEW.imageable_type != 'Member' AND NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' THEN
+        IF NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' THEN
           SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.';
-        ELSEIF NEW.imageable_type = 'Member' AND NOT EXISTS (SELECT id FROM members WHERE id = NEW.imageable_id) THEN
-          SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Member with that id.';
         ELSEIF NEW.imageable_type = 'Employee' AND NOT EXISTS (SELECT id FROM employees WHERE id = NEW.imageable_id) THEN
           SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No Employee with that id.';
