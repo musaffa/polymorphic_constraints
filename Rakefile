@@ -150,6 +150,8 @@ namespace :test do
   end
 end
 
+task :default => 'test:unit:all'
+
 # RDoc::Task.new(:rdoc) do |rdoc|
 #   rdoc.rdoc_dir = 'rdoc'
 #   rdoc.title    = 'PolymorphicConstraints'

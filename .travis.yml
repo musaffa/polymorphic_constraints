@@ -3,5 +3,3 @@ rvm:
   - 2.1.2
 gemfile:
   - gemfiles/Gemfile.rails-4.0
-script:
-  - bundle exec rake test:unit:all
