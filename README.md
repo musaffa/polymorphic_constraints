@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/musaffa/polymorphic_constraints.svg)](https://travis-ci.org/musaffa/polymorphic_constraints)
 [![Coverage Status](https://coveralls.io/repos/musaffa/polymorphic_constraints/badge.png)](https://coveralls.io/r/musaffa/polymorphic_constraints)
+[![Code Climate](https://codeclimate.com/github/musaffa/polymorphic_constraints/badges/gpa.svg)](https://codeclimate.com/github/musaffa/polymorphic_constraints)
 
 Polymorphic Constraints gem introduces some methods to your migrations to help to maintain the referential integrity for your Rails polymorphic associations.
 
