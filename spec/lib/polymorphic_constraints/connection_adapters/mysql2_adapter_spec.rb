@@ -3,52 +3,47 @@ require 'polymorphic_constraints/connection_adapters/mysql2_adapter'
 
 describe PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter do
 
-  class TestAdapter
+  class MysqlTestAdapter
     include Support::AdapterHelper
     include PolymorphicConstraints::ConnectionAdapters::Mysql2Adapter
   end
 
-  subject { TestAdapter.new }
+  subject { MysqlTestAdapter.new }
 
   it { is_expected.to respond_to(:supports_polymorphic_constraints?) }
   it { is_expected.to respond_to(:add_polymorphic_constraints) }
   it { is_expected.to respond_to(:remove_polymorphic_constraints) }
 
   describe 'add constraints' do
-    context 'search strategy' do
-      it 'defaults to active_record_descendants search strategy' do
-        expect(subject.add_polymorphic_constraints(:imageable, :pictures)).to eql([drop_create_trigger_sql,
-                                                                                   drop_update_trigger_sql,
-                                                                                   drop_employees_delete_trigger_sql,
-                                                                                   drop_products_delete_trigger_sql,
-                                                                                   create_trigger_sql,
-                                                                                   update_trigger_sql,
-                                                                                   employees_delete_trigger_sql,
-                                                                                   products_delete_trigger_sql])
-      end
-
-      it 'returns expected add constraints sql with polymorphic model options' do
-        expect(subject.add_polymorphic_constraints(:imageable, :pictures,
-                                                   polymorphic_models: [:employee])).to eql([drop_create_trigger_sql,
-                                                                                             drop_update_trigger_sql,
-                                                                                             drop_employees_delete_trigger_sql,
-                                                                                             drop_products_delete_trigger_sql,
-                                                                                             create_trigger_sql_only_employee,
-                                                                                             update_trigger_sql_only_employee,
-                                                                                             employees_delete_trigger_sql])
-      end
+    it 'defaults to active_record_descendants search strategy' do
+      expect(subject.add_polymorphic_constraints(:imageable, :pictures)).to eql([drop_create_trigger_sql,
+                                                                                 drop_update_trigger_sql,
+                                                                                 drop_employees_delete_trigger_sql,
+                                                                                 drop_products_delete_trigger_sql,
+                                                                                 create_trigger_sql,
+                                                                                 update_trigger_sql,
+                                                                                 employees_delete_trigger_sql,
+                                                                                 products_delete_trigger_sql])
     end
 
+    it 'returns expected add constraints sql with polymorphic model options' do
+      expect(subject.add_polymorphic_constraints(:imageable, :pictures,
+                                                 polymorphic_models: [:employee])).to eql([drop_create_trigger_sql,
+                                                                                           drop_update_trigger_sql,
+                                                                                           drop_employees_delete_trigger_sql,
+                                                                                           drop_products_delete_trigger_sql,
+                                                                                           create_trigger_sql_only_employee,
+                                                                                           update_trigger_sql_only_employee,
+                                                                                           employees_delete_trigger_sql])
+    end
   end
 
   describe 'remove constraints' do
-    context 'search strategy' do
-      it 'defaults to active_record_descendants search strategy' do
-        expect(subject.remove_polymorphic_constraints(:imageable)).to eql([drop_create_trigger_sql,
-                                                                           drop_update_trigger_sql,
-                                                                           drop_employees_delete_trigger_sql,
-                                                                           drop_products_delete_trigger_sql])
-      end
+    it 'defaults to active_record_descendants search strategy' do
+      expect(subject.remove_polymorphic_constraints(:imageable)).to eql([drop_create_trigger_sql,
+                                                                         drop_update_trigger_sql,
+                                                                         drop_employees_delete_trigger_sql,
+                                                                         drop_products_delete_trigger_sql])
     end
   end
 

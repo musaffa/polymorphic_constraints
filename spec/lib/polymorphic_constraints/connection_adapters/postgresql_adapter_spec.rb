@@ -3,31 +3,29 @@ require 'polymorphic_constraints/connection_adapters/postgresql_adapter'
 
 describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
 
-  class TestAdapter
+  class PostgresqlTestAdapter
     include Support::AdapterHelper
     include PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter
   end
 
-  subject { TestAdapter.new }
+  subject { PostgresqlTestAdapter.new }
 
   it { is_expected.to respond_to(:supports_polymorphic_constraints?) }
   it { is_expected.to respond_to(:add_polymorphic_constraints) }
   it { is_expected.to respond_to(:remove_polymorphic_constraints) }
 
   describe 'add constraints' do
-    context 'search strategy' do
-      it 'defaults to active_record_descendants search strategy' do
-        expect(subject.add_polymorphic_constraints(:imageable, :pictures)).to eql([drop_triggers_sql,
-                                                                                   upsert_triggers_sql,
-                                                                                   delete_triggers_sql])
-      end
+    it 'defaults to active_record_descendants search strategy' do
+      expect(subject.add_polymorphic_constraints(:imageable, :pictures)).to eql([drop_triggers_sql,
+                                                                                 upsert_triggers_sql,
+                                                                                 delete_triggers_sql])
+    end
 
-      it 'returns expected add constraints sql with polymorphic model options' do
-        expect(subject.add_polymorphic_constraints(:imageable, :pictures,
-                                                   polymorphic_models: [:employee])).to eql([drop_triggers_sql,
-                                                                                             upsert_triggers_sql_only_employee,
-                                                                                             delete_triggers_sql_only_employee])
-      end
+    it 'returns expected add constraints sql with polymorphic model options' do
+      expect(subject.add_polymorphic_constraints(:imageable, :pictures,
+                                                 polymorphic_models: [:employee])).to eql([drop_triggers_sql,
+                                                                                           upsert_triggers_sql_only_employee,
+                                                                                           delete_triggers_sql_only_employee])
     end
   end
 

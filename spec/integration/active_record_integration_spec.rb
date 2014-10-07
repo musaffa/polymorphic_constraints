@@ -2,8 +2,8 @@ require 'spec_helper'
 
 describe 'Active Record Integration' do
   before :all do
-    ENV['db_adapter'] ||= 'sqlite'
-    send("setup_#{ENV['db_adapter']}")
+    adapter = ActiveRecord::Base.connection_config[:adapter]
+    send("setup_#{adapter}")
   end
 
   context 'insertion' do

@@ -221,7 +221,7 @@ This `remove_polymorphic_constraints` will delete all the existing `:imageable` 
 
 ```ruby
 rake
-rake test:unit:all
+rake test:unit
 rake test:integration:all
 rake test:integration:sqlite
 rake test:integration:postgresql

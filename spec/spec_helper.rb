@@ -16,7 +16,7 @@ RSpec.configure do |config|
   end
 end
 
-def setup_sqlite
+def setup_sqlite3
   connection_config = ActiveRecord::Base.connection_config
   ActiveRecord::Base.establish_connection(connection_config)
   migrate_db
@@ -27,7 +27,7 @@ def setup_postgresql
   migrate_db
 end
 
-def setup_mysql
+def setup_mysql2
   connect_db
   migrate_db
 end
