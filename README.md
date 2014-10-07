@@ -6,11 +6,20 @@ Polymorphic Constraints gem introduces some methods to your migrations to help t
 
 It uses triggers to enforce the constraints. It enforces constraints on `insert`, `update` and `delete`. `update` and `delete` constraints works like the `:restrict` option of foreign key. 
 
+## Support
+
 It supports the following adapters:
 
 * sqlite3
 * postgresql
 * mysql2
+
+Supported platforms:
+
+* Ruby versions - 1.9.3, 2.0, 2.1 or greater
+* Rails versions - 3.1, 3.2, 4.0, 4.1 or greater
+
+(let me know if it works on lesser rails versions)
 
 ## Installation
 
