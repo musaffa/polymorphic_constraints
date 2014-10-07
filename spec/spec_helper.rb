@@ -3,6 +3,9 @@ ENV['RAILS_ENV'] ||= 'test'
 require 'dummy/config/environment'
 require_relative '../lib/polymorphic_constraints'
 require 'rspec/rails'
+require 'coveralls'
+
+Coveralls.wear!
 
 ActiveRecord::Migration.verbose = true
 Dir[File.join(File.dirname(__FILE__), 'support/**/*.rb')].each { |f| require f }
