@@ -3,11 +3,11 @@ require 'spec_helper'
 describe 'polymorphic error reraise' do
   class DummyController < ApplicationController
     def polymorphic_record_not_found
-      raise ActiveRecord::StatementInvalid, 'Polymorphic Constraints error. Polymorphic record not found.'
+      raise ActiveRecord::StatementInvalid, 'Polymorphic record not found.'
     end
 
     def polymorphic_reference_exists
-      raise ActiveRecord::StatementInvalid, 'Polymorphic Constraints error. Polymorphic reference exists.'
+      raise ActiveRecord::StatementInvalid, 'Polymorphic reference exists.'
     end
 
     def not_a_polymorphic_error
@@ -31,8 +31,8 @@ describe 'polymorphic error reraise' do
     end
 
     context 'polymorphic reference exists' do
-      it 're-raises ActiveRecord::InvalidForeignKey properly' do
-        expect { get :polymorphic_reference_exists }.to raise_error(ActiveRecord::InvalidForeignKey)
+      it 're-raises ActiveRecord::ReferenceViolation properly' do
+        expect { get :polymorphic_reference_exists }.to raise_error(ActiveRecord::ReferenceViolation)
       end
     end
 

@@ -99,7 +99,7 @@ This migration will create the necessary triggers to apply insert, update and de
 >> picture.save # update completes successfully
 
 # delete/destroy
->> employee.delete # raises ActiveRecord::InvalidForeignKey exeption. cannot delete because the picture still refers to the employee as the imageable.
+>> employee.delete # raises ActiveRecord::ReferenceViolation exeption. cannot delete because the picture still refers to the employee as the imageable.
 >> employee.destroy # destroys successfully. unlike product, employee implements dependent destroy on imageable. so it destroys the picture first, then it destroys itself.
 >> Employee.count # 0
 >> Picture.count # 0
@@ -109,12 +109,19 @@ This migration will create the necessary triggers to apply insert, update and de
 >> picture.imageable_type = product.class.to_s # 'Product'
 >> picture.save
 
->> product.delete # raises ActiveRecord::InvalidForeignKey exeption. cannot delete because the picture still refers to the product as the imageable.
->> product.destroy # raises ActiveRecord::InvalidForeignKey exeption. works the same as delete because product model hasn't implemented dependent destroy on imageable.
+>> product.delete # raises ActiveRecord::ReferenceViolation exeption. cannot delete because the picture still refers to the product as the imageable.
+>> product.destroy # raises ActiveRecord::ReferenceViolation exeption. works the same as delete because product model hasn't implemented dependent destroy on imageable.
 
 >> another_product = Product.create
 >> another_product.delete # deletes successfully as no picture refers to this product.
 ```
+
+## Exceptions
+
+* `ActiveRecord::RecordNotFound` - It is raised when insert/update is attempted on a table with a record that refers to a non-existent polymorphic record in another table.
+* `ActiveRecord::ReferenceViolation` - It is raised when a delete is attempted from a polymorphic table that is referred to by a record in the associated table.
+
+_naming convention:_ in the above example `Product` and `Employee` are polymorphic tables. `Picture` is an associated table. 
 
 ## Model Search Strategy:
 

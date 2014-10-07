@@ -106,7 +106,7 @@ module PolymorphicConstraints
                          WHERE #{relation}_type = '#{polymorphic_model.classify}'
                          AND #{relation}_id = OLD.id) THEN
                 SIGNAL SQLSTATE '45000'
-                  SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic reference exists.
+                  SET MESSAGE_TEXT = 'Polymorphic reference exists.
                                       There are records in the #{associated_table} table that refer to the
                                       table #{polymorphic_model.classify.constantize.table_name}.
                                       You must delete those records of table #{associated_table} first.';
@@ -140,7 +140,7 @@ module PolymorphicConstraints
 
         sql << <<-SQL
           THEN SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found. No model by that name.';
+            SET MESSAGE_TEXT = 'Polymorphic record not found. No model by that name.';
         SQL
 
 
@@ -151,8 +151,7 @@ module PolymorphicConstraints
                                WHERE id = NEW.#{relation}_id) THEN
 
               SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Polymorphic Constraints error. Polymorphic record not found.
-                                    No #{polymorphic_model.classify} with that id.';
+                SET MESSAGE_TEXT = 'Polymorphic record not found. No #{polymorphic_model.classify} with that id.';
           SQL
         end
 

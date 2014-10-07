@@ -5,10 +5,10 @@ module PolymorphicConstraints
 
       included do
         rescue_from ActiveRecord::StatementInvalid do |exception|
-          if exception.message =~ /Polymorphic Constraints error. Polymorphic record not found./
+          if exception.message =~ /Polymorphic record not found./
             raise ActiveRecord::RecordNotFound, exception.message
-          elsif exception.message =~ /Polymorphic Constraints error. Polymorphic reference exists./
-            raise ActiveRecord::InvalidForeignKey, exception.message
+          elsif exception.message =~ /Polymorphic reference exists./
+            raise ActiveRecord::ReferenceViolation, exception.message
           else
             raise exception
           end

@@ -2,6 +2,9 @@ module PolymorphicConstraints
   class Railtie < Rails::Railtie
     initializer 'polymorphic_constraints.load_migration' do
       ActiveSupport.on_load :active_record do
+        class ActiveRecord::ReferenceViolation < ActiveRecord::ActiveRecordError
+        end
+
         ActiveRecord::ConnectionAdapters.module_eval do
           include PolymorphicConstraints::ConnectionAdapters::SchemaStatements
         end
