@@ -46,11 +46,11 @@ namespace :test do
   end
 
   namespace :integration do
-    rule '.yml' do |task|
-      FileUtils.copy ('spec/' + task.name), 'spec/dummy/config/database.yml'
+    rule '.yml' do |file|
+      FileUtils.copy ('spec/dummy/config/' + file.name), 'spec/dummy/config/database.yml'
     end
 
-    task :sqlite => 'dummy/config/database.sqlite.yml' do
+    task :sqlite => 'database.sqlite.yml' do
       ENV['db_adapter'] = 'sqlite'
 
       RSpec::Core::RakeTask.new(:sqlite_integration) do |t|
@@ -59,7 +59,7 @@ namespace :test do
       Rake::Task['sqlite_integration'].execute
     end
 
-    task :postgresql => 'dummy/config/database.postgresql.yml' do
+    task :postgresql => 'database.postgresql.yml' do
       ENV['db_adapter'] = 'postgresql'
 
       RSpec::Core::RakeTask.new(:postgresql_integration) do |t|
@@ -68,7 +68,7 @@ namespace :test do
       Rake::Task['postgresql_integration'].execute
     end
 
-    task :mysql => 'dummy/config/database.mysql.yml' do
+    task :mysql => 'database.mysql.yml' do
       ENV['db_adapter'] = 'mysql'
 
       RSpec::Core::RakeTask.new(:mysql_integration) do |t|
