@@ -8,9 +8,7 @@ module PolymorphicConstraints
     extend ActiveSupport::Autoload
 
     autoload_under 'abstract' do
-      autoload :SchemaDefinitions
       autoload :SchemaStatements
-      autoload :Table
     end
   end
 
