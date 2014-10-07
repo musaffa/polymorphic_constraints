@@ -12,6 +12,3 @@ gemspec
 
 # To use debugger
 # gem 'debugger'
-group :test do
-  gem 'coveralls', require: false
-end
