@@ -20,22 +20,23 @@ def setup_sqlite
 end
 
 def setup_postgresql
-  connection_config = ActiveRecord::Base.connection_config
-  ActiveRecord::Base.establish_connection(connection_config.merge(:database => nil))
-  ActiveRecord::Base.connection.recreate_database(connection_config[:database])
-  ActiveRecord::Base.establish_connection(connection_config)
+  connect_db
   migrate_db
 end
 
 def setup_mysql
-  connection_config = ActiveRecord::Base.connection_config
-  ActiveRecord::Base.establish_connection(connection_config.merge(:database => nil))
-  ActiveRecord::Base.connection.recreate_database(connection_config[:database])
-  ActiveRecord::Base.establish_connection(connection_config)
+  connect_db
   migrate_db
 end
 
 private
+
+def connect_db
+  connection_config = ActiveRecord::Base.connection_config
+  ActiveRecord::Base.establish_connection(connection_config.merge(:database => nil))
+  ActiveRecord::Base.connection.recreate_database(connection_config[:database])
+  ActiveRecord::Base.establish_connection(connection_config)
+end
 
 def migrate_db
   ActiveRecord::Migrator.migrate(File.join(Rails.root, 'db/migrate'))
