@@ -8,35 +8,31 @@ require 'rspec/core/rake_task'
 require 'fileutils'
 # require 'rdoc/task'
 
-def prepare_database_config(db_adapter)
-  FileUtils.copy "spec/dummy/config/database.#{db_adapter}.yml", 'spec/dummy/config/database.yml'
-end
-
 namespace :test do
   namespace :unit do
     task :prepare_database do
-      prepare_database_config('sqlite')
+      FileUtils.copy 'spec/dummy/config/database.sqlite.yml', 'spec/dummy/config/database.yml'
     end
 
     task :sqlite => :prepare_database do
-      RSpec::Core::RakeTask.new(:sqlite) do |t|
+      RSpec::Core::RakeTask.new(:sqlite_adapter) do |t|
         t.pattern = 'spec/lib/polymorphic_constraints/connection_adapters/sqlite3_adapter_spec.rb'
       end
-      Rake::Task['sqlite'].execute
+      Rake::Task['sqlite_adapter'].execute
     end
 
     task :postgresql => :prepare_database do
-      RSpec::Core::RakeTask.new(:postgresql) do |t|
+      RSpec::Core::RakeTask.new(:postgresql_adapter) do |t|
         t.pattern = 'spec/lib/polymorphic_constraints/connection_adapters/postgresql_adapter_spec.rb'
       end
-      Rake::Task['postgresql'].execute
+      Rake::Task['postgresql_adapter'].execute
     end
 
     task :mysql => :prepare_database do
-      RSpec::Core::RakeTask.new(:mysql) do |t|
+      RSpec::Core::RakeTask.new(:mysql_adapter) do |t|
         t.pattern = 'spec/lib/polymorphic_constraints/connection_adapters/mysql2_adapter_spec.rb'
       end
-      Rake::Task['mysql'].execute
+      Rake::Task['mysql_adapter'].execute
     end
 
     task :error_handler => :prepare_database do
@@ -50,34 +46,35 @@ namespace :test do
   end
 
   namespace :integration do
-    task :sqlite do
+    rule '.yml' do |task|
+      FileUtils.copy ('spec/' + task.name), 'spec/dummy/config/database.yml'
+    end
+
+    task :sqlite => 'dummy/config/database.sqlite.yml' do
       ENV['db_adapter'] = 'sqlite'
-      prepare_database_config('sqlite')
 
-      RSpec::Core::RakeTask.new(:sqlite) do |t|
+      RSpec::Core::RakeTask.new(:sqlite_integration) do |t|
         t.pattern = 'spec/integration/active_record_integration_spec.rb'
       end
-      Rake::Task['sqlite'].execute
+      Rake::Task['sqlite_integration'].execute
     end
 
-    task :postgresql do
+    task :postgresql => 'dummy/config/database.postgresql.yml' do
       ENV['db_adapter'] = 'postgresql'
-      prepare_database_config('postgresql')
 
-      RSpec::Core::RakeTask.new(:postgresql) do |t|
+      RSpec::Core::RakeTask.new(:postgresql_integration) do |t|
         t.pattern = 'spec/integration/active_record_integration_spec.rb'
       end
-      Rake::Task['postgresql'].execute
+      Rake::Task['postgresql_integration'].execute
     end
 
-    task :mysql do
+    task :mysql => 'dummy/config/database.mysql.yml' do
       ENV['db_adapter'] = 'mysql'
-      prepare_database_config('mysql')
 
-      RSpec::Core::RakeTask.new(:mysql) do |t|
+      RSpec::Core::RakeTask.new(:mysql_integration) do |t|
         t.pattern = 'spec/integration/active_record_integration_spec.rb'
       end
-      Rake::Task['mysql'].execute
+      Rake::Task['mysql_integration'].execute
     end
 
     task :all => [:sqlite, :postgresql, :mysql]
