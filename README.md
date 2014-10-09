@@ -37,8 +37,8 @@ gem 'polymorphic_constraints'
 
 This gem adds the following methods to your migrations:
 
-* add_polymorphic_constraints(relation, associated_model, options)
-* update_polymorphic_constraints(relation, associated_model, options)
+* add_polymorphic_constraints(relation, associated_table, options)
+* update_polymorphic_constraints(relation, associated_table, options)
 * remove_polymorphic_constraints(relation)
 
 From [Rails Guide](http://guides.rubyonrails.org/association_basics.html#polymorphic-associations)
