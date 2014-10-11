@@ -1,10 +1,10 @@
 # Polymorphic Constraints
 
-[![Gem Version](http://img.shields.io/gem/v/polymorphic_constraints.svg)](https://rubygems.org/gems/polymorphic_constraints)
+[![Gem Version](https://badge.fury.io/rb/polymorphic_constraints.svg)](http://badge.fury.io/rb/polymorphic_constraints)
 [![Build Status](https://travis-ci.org/musaffa/polymorphic_constraints.svg)](https://travis-ci.org/musaffa/polymorphic_constraints)
-[![Dependency Status](http://img.shields.io/gemnasium/musaffa/polymorphic_constraints.svg)](https://gemnasium.com/musaffa/polymorphic_constraints)
-[![Coverage Status](http://img.shields.io/coveralls/musaffa/polymorphic_constraints.svg)](https://coveralls.io/r/musaffa/polymorphic_constraints)
-[![Code Climate](http://img.shields.io/codeclimate/github/musaffa/polymorphic_constraints.svg)](https://codeclimate.com/github/musaffa/polymorphic_constraints)
+[![Dependency Status](https://gemnasium.com/musaffa/polymorphic_constraints.svg)](https://gemnasium.com/musaffa/polymorphic_constraints)
+[![Coverage Status](https://coveralls.io/repos/musaffa/polymorphic_constraints/badge.png)](https://coveralls.io/r/musaffa/polymorphic_constraints)
+[![Code Climate](https://codeclimate.com/github/musaffa/polymorphic_constraints/badges/gpa.svg)](https://codeclimate.com/github/musaffa/polymorphic_constraints)
 
 Polymorphic Constraints gem introduces some methods to your migrations to help to maintain the referential integrity for your Rails polymorphic associations.
 
@@ -83,7 +83,7 @@ For the second method to work properly, the polymorphic tables `employees` and `
 
 run: `rake db:migrate`
 
-This migration will create the necessary triggers to apply insert, update and delete constraints on polymorphic relation named `imageable`.
+This migration will create the necessary triggers to apply insert, update and delete constraints on `imageable` polymorphic relation.
 
 ```ruby
 # insert
