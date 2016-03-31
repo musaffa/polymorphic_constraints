@@ -7,9 +7,19 @@ module PolymorphicConstraints
   module ConnectionAdapters
     extend ActiveSupport::Autoload
 
+    autoload :BaseAdapter
+    autoload :CommonAdapter
+
     autoload_under 'abstract' do
       autoload :SchemaStatements
     end
+  end
+
+  module Utils
+    extend ActiveSupport::Autoload
+
+    autoload :SqlString
+    autoload :PolymorphicModelFinder
   end
 
   module Migration

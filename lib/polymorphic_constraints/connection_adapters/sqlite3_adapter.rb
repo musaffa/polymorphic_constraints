@@ -1,100 +1,11 @@
-require 'active_support/inflector'
-require_relative '../utils/sql_string'
-require_relative '../utils/polymorphic_model_finder'
-
 module PolymorphicConstraints
   module ConnectionAdapters
     module SQLite3Adapter
-      include PolymorphicConstraints::Utils::SqlString
-      include PolymorphicConstraints::Utils::PolymorphicModelFinder
-
-      def supports_polymorphic_constraints?
-        true
-      end
-
-      def add_polymorphic_constraints(relation, associated_table, options = {})
-        polymorphic_models = options.fetch(:polymorphic_models) { get_polymorphic_models(relation) }
-
-        statements = constraints_remove_statements(relation)
-        statements << generate_create_constraints(relation, associated_table, polymorphic_models)
-        statements << generate_update_constraints(relation, associated_table, polymorphic_models)
-
-        polymorphic_models.each do |polymorphic_model|
-          statements << generate_delete_constraints(relation, associated_table, polymorphic_model)
-        end
-
-        statements.each { |statement| execute statement }
-      end
-
-      def remove_polymorphic_constraints(relation)
-        statements = constraints_remove_statements(relation)
-        statements.each { |statement| execute statement }
-      end
-
-      alias_method :update_polymorphic_constraints, :add_polymorphic_constraints
+      include CommonAdapter
 
       private
 
-      def constraints_remove_statements(relation)
-        polymorphic_models = get_polymorphic_models(relation)
-
-        statements = []
-        statements << drop_trigger(relation, 'insert')
-        statements << drop_trigger(relation, 'update')
-
-        polymorphic_models.each do |polymorphic_model|
-          statements << drop_delete_trigger(relation, polymorphic_model)
-        end
-
-        statements
-      end
-
-      def drop_trigger(relation, action)
-        sql = <<-SQL
-          DROP TRIGGER IF EXISTS check_#{relation}_#{action}_integrity;
-        SQL
-
-        strip_non_essential_spaces(sql)
-      end
-
-      def drop_delete_trigger(relation, polymorphic_model)
-        table_name = polymorphic_model.to_s.classify.constantize.table_name
-
-        sql = <<-SQL
-          DROP TRIGGER IF EXISTS check_#{relation}_#{table_name}_delete_integrity;
-        SQL
-
-        strip_non_essential_spaces(sql)
-      end
-
-      def generate_create_constraints(relation, associated_table, polymorphic_models)
-        associated_table = associated_table.to_s
-
-        sql = <<-SQL
-          CREATE TRIGGER check_#{relation}_insert_integrity
-            BEFORE INSERT ON #{associated_table}
-        SQL
-
-        sql << common_upsert_sql(relation, polymorphic_models)
-
-        strip_non_essential_spaces(sql)
-      end
-
-      def generate_update_constraints(relation, associated_table, polymorphic_models)
-        associated_table = associated_table.to_s
-        polymorphic_models = polymorphic_models.map(&:to_s)
-
-        sql = <<-SQL
-          CREATE TRIGGER check_#{relation}_update_integrity
-            BEFORE UPDATE ON #{associated_table}
-        SQL
-
-        sql << common_upsert_sql(relation, polymorphic_models)
-
-        strip_non_essential_spaces(sql)
-      end
-
-      def generate_delete_constraints(relation, associated_table, polymorphic_model)
+      def delete_statement(relation, associated_table, polymorphic_model)
         associated_table = associated_table.to_s
         polymorphic_model = polymorphic_model.to_s
         

@@ -31,7 +31,7 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
 
   describe 'remove constraints' do
     it 'returns expected drop trigger sql' do
-      expect(subject.remove_polymorphic_constraints(:imageable)).to eql(drop_triggers_sql)
+      expect(subject.remove_polymorphic_constraints(:imageable)).to eql([drop_triggers_sql])
     end
   end
 
