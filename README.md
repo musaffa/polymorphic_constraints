@@ -20,10 +20,7 @@ It supports the following adapters:
 
 Supported platforms:
 
-* Ruby versions - 1.9.3, 2.0, 2.1 or greater
-* Rails versions - 3.1, 3.2, 4.0, 4.1 or greater
-
-(let me know if it works on lesser rails versions)
+* Rails versions - 3 and 4.
 
 ## Installation
 
@@ -222,12 +219,16 @@ This `remove_polymorphic_constraints` will delete all the existing `:imageable` 
 ## Tests
 
 ```ruby
-rake
-rake test:unit
-rake test:integration:all
-rake test:integration:sqlite
-rake test:integration:postgresql
-rake test:integration:mysql
+$ rake
+$ rake test:unit
+$ rake test:integration:all
+$ rake test:integration:sqlite
+$ rake test:integration:postgresql
+$ rake test:integration:mysql
+
+# test different active model versions
+$ appraisal install
+$ appraisal rake
 ```
 
 ## Problems
@@ -245,11 +246,6 @@ Please use GitHub's [issue tracker](http://github.com/musaffa/polymorphic_constr
 3. Commit your changes (`git commit -am 'Added some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
-
-## Inspirations
-
-* [Foreigner](https://github.com/matthuhiggins/foreigner)
-* [Fides](https://github.com/mkraft/fides)
 
 ## License
 
