@@ -7,7 +7,8 @@ require 'rspec/rails'
 # Fix Rails 4.2 + Ruby 2.6 compatibility: MonitorMixin#mon_initialize
 # raises ThreadError when called twice on the same object, but
 # ActionController::TestResponse#recycle! calls initialize again.
-if RUBY_VERSION >= '2.6'
+# Rails 5.0+ rewrote recycle!, so this is only needed for 4.x.
+if Rails::VERSION::MAJOR == 4 && RUBY_VERSION >= '2.6'
   class ActionController::TestResponse < ActionDispatch::TestResponse
     def recycle!
       @mon_mutex = nil
@@ -29,8 +30,8 @@ RSpec.configure do |config|
 end
 
 def setup_sqlite3
-  connection_config = ActiveRecord::Base.connection_config
-  ActiveRecord::Base.establish_connection(connection_config)
+  cfg = get_connection_config
+  ActiveRecord::Base.establish_connection(cfg)
   migrate_db
 end
 
@@ -46,16 +47,31 @@ end
 
 private
 
+def get_connection_config
+  if ActiveRecord::Base.respond_to?(:connection_db_config)
+    ActiveRecord::Base.connection_db_config.configuration_hash
+  else
+    ActiveRecord::Base.connection_config
+  end
+end
+
 def connect_db
-  connection_config = ActiveRecord::Base.connection_config
-  maintenance_db = connection_config[:adapter] == 'postgresql' ? 'postgres' : nil
-  ActiveRecord::Base.establish_connection(connection_config.merge(:database => maintenance_db))
-  ActiveRecord::Base.connection.recreate_database(connection_config[:database])
-  ActiveRecord::Base.establish_connection(connection_config)
+  cfg = get_connection_config
+  maintenance_db = cfg[:adapter] == 'postgresql' ? 'postgres' : nil
+  ActiveRecord::Base.establish_connection(cfg.merge(:database => maintenance_db))
+  ActiveRecord::Base.connection.recreate_database(cfg[:database])
+  ActiveRecord::Base.establish_connection(cfg)
 end
 
 def migrate_db
-  ActiveRecord::Migrator.migrate(File.join(Rails.root, 'db/migrate'))
+  path = File.join(Rails.root, 'db/migrate')
+  if !defined?(ActiveRecord::MigrationContext)
+    ActiveRecord::Migrator.migrate(path)
+  elsif ActiveRecord::MigrationContext.instance_method(:initialize).parameters.count { |type, _| type == :req } > 1
+    ActiveRecord::MigrationContext.new(path, ActiveRecord::SchemaMigration).migrate
+  else
+    ActiveRecord::MigrationContext.new(path).migrate
+  end
 end
 
 def drop_tables

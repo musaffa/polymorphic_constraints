@@ -1,3 +1,3 @@
-# Be sure to restart your server when you modify this file.
-
-Rails.application.config.session_store :cookie_store, key: '_dummy_session'
+if Rails.application.config.respond_to?(:session_store)
+  Rails.application.config.session_store :cookie_store, key: '_dummy_session'
+end

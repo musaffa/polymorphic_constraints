@@ -18,7 +18,11 @@ module PolymorphicConstraints
       end
 
       def configured_name
-        @configured_name ||= ActiveRecord::Base.connection_pool.spec.config[:adapter]
+        @configured_name ||= if ActiveRecord::Base.respond_to?(:connection_db_config)
+          ActiveRecord::Base.connection_db_config.adapter
+        else
+          ActiveRecord::Base.connection_pool.spec.config[:adapter]
+        end
       end
 
       def safe_include(adapter_class_name, adapter_ext)

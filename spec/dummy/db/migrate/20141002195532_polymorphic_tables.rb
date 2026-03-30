@@ -1,4 +1,10 @@
-class PolymorphicTables < ActiveRecord::Migration
+migration_class = if ActiveRecord::Migration.respond_to?(:[])
+  ActiveRecord::Migration[4.2]
+else
+  ActiveRecord::Migration
+end
+
+class PolymorphicTables < migration_class
   def change
     create_table :employees do |t|
       t.timestamps null: false

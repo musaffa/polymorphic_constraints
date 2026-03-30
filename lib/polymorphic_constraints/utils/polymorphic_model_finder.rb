@@ -5,7 +5,7 @@ module PolymorphicConstraints
         Rails.application.eager_load!
         ActiveRecord::Base.descendants.select do |klass|
           contains_polymorphic_relation?(klass, relation)
-        end
+        end.sort_by(&:name)
       end
 
       private

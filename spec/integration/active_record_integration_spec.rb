@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe 'Active Record Integration' do
   before :all do
-    adapter = ActiveRecord::Base.connection_config[:adapter]
+    adapter = get_connection_config[:adapter]
     send("setup_#{adapter}")
   end
 

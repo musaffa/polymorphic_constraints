@@ -5,7 +5,10 @@ require "active_record/railtie"
 require "action_controller/railtie"
 require "action_mailer/railtie"
 require "action_view/railtie"
-require "sprockets/railtie"
+begin
+  require "sprockets/railtie"
+rescue LoadError
+end
 # require "rails/test_unit/railtie"
 
 Bundler.require(*Rails.groups)
