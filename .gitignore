@@ -11,4 +11,5 @@ gemfiles/*.lock
 coverage/
 /.idea
 .ruby-version
+.rake_tasks~
 spec/dummy/config/database.yml
