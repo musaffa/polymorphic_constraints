@@ -11,7 +11,7 @@ module PolymorphicConstraints
         
         sql = <<-SQL
           CREATE TRIGGER check_#{relation}_#{polymorphic_model.classify.constantize.table_name}_delete_integrity
-            BEFORE DELETE ON #{polymorphic_model.classify.constantize.table_name}
+            AFTER DELETE ON #{polymorphic_model.classify.constantize.table_name}
             BEGIN
               SELECT CASE
                 WHEN EXISTS (SELECT id FROM #{associated_table}

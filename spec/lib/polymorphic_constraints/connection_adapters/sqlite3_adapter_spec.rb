@@ -55,7 +55,7 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
   let(:employees_delete_trigger_sql) do
     subject.strip_non_essential_spaces(%{
       CREATE TRIGGER check_imageable_employees_delete_integrity
-        BEFORE DELETE ON employees
+        AFTER DELETE ON employees
         BEGIN
           SELECT CASE
             WHEN EXISTS (SELECT id FROM pictures WHERE imageable_type = 'Employee' AND imageable_id = OLD.id) THEN
@@ -72,7 +72,7 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
   let(:products_delete_trigger_sql) do
     subject.strip_non_essential_spaces(%{
       CREATE TRIGGER check_imageable_products_delete_integrity
-        BEFORE DELETE ON products
+        AFTER DELETE ON products
         BEGIN
           SELECT CASE
             WHEN EXISTS (SELECT id FROM pictures WHERE imageable_type = 'Product' AND imageable_id = OLD.id) THEN
@@ -87,7 +87,7 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
   let(:create_trigger_sql) do
     subject.strip_non_essential_spaces(%{
       CREATE TRIGGER check_imageable_insert_integrity
-      BEFORE INSERT ON pictures
+      AFTER INSERT ON pictures
       BEGIN
         SELECT CASE
           WHEN ( NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' ) THEN
@@ -104,7 +104,7 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
   let(:update_trigger_sql) do
     subject.strip_non_essential_spaces(%{
       CREATE TRIGGER check_imageable_update_integrity
-      BEFORE UPDATE ON pictures
+      AFTER UPDATE ON pictures
       BEGIN
         SELECT CASE
           WHEN ( NEW.imageable_type != 'Employee' AND NEW.imageable_type != 'Product' ) THEN
@@ -121,7 +121,7 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
   let(:create_trigger_sql_only_employee) do
     subject.strip_non_essential_spaces(%{
       CREATE TRIGGER check_imageable_insert_integrity
-      BEFORE INSERT ON pictures
+      AFTER INSERT ON pictures
       BEGIN
         SELECT CASE
           WHEN ( NEW.imageable_type != 'Employee' ) THEN
@@ -136,7 +136,7 @@ describe PolymorphicConstraints::ConnectionAdapters::SQLite3Adapter do
   let(:update_trigger_sql_only_employee) do
     subject.strip_non_essential_spaces(%{
       CREATE TRIGGER check_imageable_update_integrity
-      BEFORE UPDATE ON pictures
+      AFTER UPDATE ON pictures
       BEGIN
         SELECT CASE
           WHEN ( NEW.imageable_type != 'Employee' ) THEN

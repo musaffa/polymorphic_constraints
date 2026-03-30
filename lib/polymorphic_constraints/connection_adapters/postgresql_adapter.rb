@@ -41,8 +41,9 @@ module PolymorphicConstraints
           END'
           LANGUAGE plpgsql;
 
-          CREATE TRIGGER check_#{relation}_upsert_integrity_trigger
-            BEFORE INSERT OR UPDATE ON #{associated_table}
+          CREATE CONSTRAINT TRIGGER check_#{relation}_upsert_integrity_trigger
+            AFTER INSERT OR UPDATE ON #{associated_table}
+            DEFERRABLE INITIALLY IMMEDIATE
             FOR EACH ROW
             EXECUTE PROCEDURE check_#{relation}_upsert_integrity();
         SQL
@@ -95,8 +96,9 @@ module PolymorphicConstraints
           table_name = polymorphic_model.classify.constantize.table_name
 
           sql << <<-SQL
-            CREATE TRIGGER check_#{relation}_#{table_name}_delete_integrity_trigger
-              BEFORE DELETE ON #{table_name}
+            CREATE CONSTRAINT TRIGGER check_#{relation}_#{table_name}_delete_integrity_trigger
+              AFTER DELETE ON #{table_name}
+              DEFERRABLE INITIALLY IMMEDIATE
               FOR EACH ROW
               EXECUTE PROCEDURE check_#{relation}_delete_integrity();
           SQL

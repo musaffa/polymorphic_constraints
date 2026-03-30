@@ -55,8 +55,9 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
         END'
       LANGUAGE plpgsql;
 
-      CREATE TRIGGER check_imageable_upsert_integrity_trigger
-        BEFORE INSERT OR UPDATE ON pictures
+      CREATE CONSTRAINT TRIGGER check_imageable_upsert_integrity_trigger
+        AFTER INSERT OR UPDATE ON pictures
+        DEFERRABLE INITIALLY IMMEDIATE
         FOR EACH ROW EXECUTE PROCEDURE check_imageable_upsert_integrity();
     })
   end
@@ -90,12 +91,14 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
         END'
       LANGUAGE plpgsql;
 
-      CREATE TRIGGER check_imageable_employees_delete_integrity_trigger
-        BEFORE DELETE ON employees
+      CREATE CONSTRAINT TRIGGER check_imageable_employees_delete_integrity_trigger
+        AFTER DELETE ON employees
+        DEFERRABLE INITIALLY IMMEDIATE
         FOR EACH ROW EXECUTE PROCEDURE check_imageable_delete_integrity();
 
-      CREATE TRIGGER check_imageable_products_delete_integrity_trigger
-        BEFORE DELETE ON products
+      CREATE CONSTRAINT TRIGGER check_imageable_products_delete_integrity_trigger
+        AFTER DELETE ON products
+        DEFERRABLE INITIALLY IMMEDIATE
         FOR EACH ROW EXECUTE PROCEDURE check_imageable_delete_integrity();
     })
   end
@@ -116,8 +119,9 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
         END'
       LANGUAGE plpgsql;
 
-      CREATE TRIGGER check_imageable_upsert_integrity_trigger
-        BEFORE INSERT OR UPDATE ON pictures
+      CREATE CONSTRAINT TRIGGER check_imageable_upsert_integrity_trigger
+        AFTER INSERT OR UPDATE ON pictures
+        DEFERRABLE INITIALLY IMMEDIATE
         FOR EACH ROW EXECUTE PROCEDURE check_imageable_upsert_integrity();
     })
   end
@@ -142,8 +146,9 @@ describe PolymorphicConstraints::ConnectionAdapters::PostgreSQLAdapter do
         END'
       LANGUAGE plpgsql;
 
-      CREATE TRIGGER check_imageable_employees_delete_integrity_trigger
-        BEFORE DELETE ON employees
+      CREATE CONSTRAINT TRIGGER check_imageable_employees_delete_integrity_trigger
+        AFTER DELETE ON employees
+        DEFERRABLE INITIALLY IMMEDIATE
         FOR EACH ROW EXECUTE PROCEDURE check_imageable_delete_integrity();
     })
   end

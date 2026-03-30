@@ -51,7 +51,7 @@ module PolymorphicConstraints
 
         sql = <<-SQL
           CREATE TRIGGER check_#{relation}_insert_integrity
-            BEFORE INSERT ON #{associated_table}
+            AFTER INSERT ON #{associated_table}
         SQL
 
         sql << common_upsert_sql(relation, polymorphic_models)
@@ -65,7 +65,7 @@ module PolymorphicConstraints
 
         sql = <<-SQL
           CREATE TRIGGER check_#{relation}_update_integrity
-            BEFORE UPDATE ON #{associated_table}
+            AFTER UPDATE ON #{associated_table}
         SQL
 
         sql << common_upsert_sql(relation, polymorphic_models)
