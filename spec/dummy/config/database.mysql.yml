@@ -1,6 +1,8 @@
 test:
   adapter: mysql2
   encoding: utf8
-  username: root
-  database: polymorphic_constraints
-  host: localhost
+  host: <%= ENV.fetch('MYSQL_HOST', 'localhost') %>
+  port: <%= ENV.fetch('MYSQL_TCP_PORT', 3306) %>
+  username: <%= ENV.fetch('MYSQL_USER', 'root') %>
+  password: <%= ENV['MYSQL_PWD'] %>
+  database: <%= ENV.fetch('MYSQL_DATABASE', 'polymorphic_constraints') %>

@@ -18,12 +18,13 @@ Gem::Specification.new do |s|
   s.require_paths  = ['lib']
 
   s.required_ruby_version = '>= 1.9.3'
-  s.add_dependency 'rails'
+  s.add_dependency 'rails', '>= 3.1'
 
-  s.add_development_dependency 'rake'
-  s.add_development_dependency 'sqlite3'
-  s.add_development_dependency 'pg'
-  s.add_development_dependency 'mysql2'
+  s.add_development_dependency 'bigdecimal', '~> 1.4.0'
+  s.add_development_dependency 'rake', '~> 13.0'
+  s.add_development_dependency 'minitest', '~> 5.15.0'
+  s.add_development_dependency 'sqlite3', '~> 1.3.6'
+  s.add_development_dependency 'pg', '~> 0.18'
+  s.add_development_dependency 'mysql2', '~> 0.5'
   s.add_development_dependency 'rspec-rails', '~> 3.4.2'
-  s.add_development_dependency 'coveralls'
 end

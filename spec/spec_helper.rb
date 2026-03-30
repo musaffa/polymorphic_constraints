@@ -3,9 +3,21 @@ ENV['RAILS_ENV'] ||= 'test'
 require 'dummy/config/environment'
 require_relative '../lib/polymorphic_constraints'
 require 'rspec/rails'
-require 'coveralls'
 
-Coveralls.wear!
+# Fix Rails 4.2 + Ruby 2.6 compatibility: MonitorMixin#mon_initialize
+# raises ThreadError when called twice on the same object, but
+# ActionController::TestResponse#recycle! calls initialize again.
+if RUBY_VERSION >= '2.6'
+  class ActionController::TestResponse < ActionDispatch::TestResponse
+    def recycle!
+      @mon_mutex = nil
+      @mon_mutex_owner_object_id = nil
+      @mon_owner = nil
+      @mon_count = nil
+      initialize
+    end
+  end
+end
 
 ActiveRecord::Migration.verbose = true
 Dir[File.join(File.dirname(__FILE__), 'support/**/*.rb')].each { |f| require f }
@@ -36,7 +48,8 @@ private
 
 def connect_db
   connection_config = ActiveRecord::Base.connection_config
-  ActiveRecord::Base.establish_connection(connection_config.merge(:database => nil))
+  maintenance_db = connection_config[:adapter] == 'postgresql' ? 'postgres' : nil
+  ActiveRecord::Base.establish_connection(connection_config.merge(:database => maintenance_db))
   ActiveRecord::Base.connection.recreate_database(connection_config[:database])
   ActiveRecord::Base.establish_connection(connection_config)
 end
