@@ -5,8 +5,8 @@ require 'polymorphic_constraints/version'
 Gem::Specification.new do |s|
   s.name        = 'polymorphic_constraints'
   s.version     = PolymorphicConstraints::VERSION
-  s.authors     = ['Ahmad Musaffa']
-  s.email       = ['musaffa_csemm@yahoo.com']
+  s.authors     = ['Ahmad Musaffa', 'Paul A. Jungwirth']
+  s.email       = ['musaffa_csemm@yahoo.com', 'pj@illuminatedcomputing.com']
   s.homepage    = 'https://github.com/musaffa/polymorphic_constraints'
   s.summary     = 'Database agnostic referential integrity enforcer for Rails polymorphic associations using triggers.'
   s.description = 'Helps to maintain referential integrity for Rails polymorphic associations.'
