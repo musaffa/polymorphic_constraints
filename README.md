@@ -221,15 +221,16 @@ Database connection parameters are configured via environment variables:
 * **MySQL**: `MYSQL_HOST`, `MYSQL_TCP_PORT`, `MYSQL_USER`, `MYSQL_PWD`, `MYSQL_DATABASE`
 * **SQLite**: `SQLITE_DATABASE`
 
-Individual rake tasks:
+All test runs require a `BUNDLE_GEMFILE` pointing at one of the appraisal
+gemfiles (see below). Available rake tasks:
 
 ```
-$ rake test:unit
-$ rake test:integration:sqlite
-$ rake test:integration:postgresql
-$ rake test:integration:mysql
-$ rake test:integration:all
-$ rake                          # unit + all integration
+rake test:unit
+rake test:integration:sqlite
+rake test:integration:postgresql
+rake test:integration:mysql
+rake test:integration:all
+rake                          # unit + all integration
 ```
 
 ### Running against all supported Rails versions
