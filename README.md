@@ -16,7 +16,8 @@ It supports the following adapters:
 
 Supported platforms:
 
-* Rails versions - 3 and 4.
+* Rails 4.2 through 8.0
+* Ruby 2.6+
 
 ## Installation
 
@@ -214,18 +215,50 @@ This `remove_polymorphic_constraints` will delete all the existing `:imageable` 
 
 ## Tests
 
-```ruby
-$ rake
+Database connection parameters are configured via environment variables:
+
+* **PostgreSQL**: `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` (standard libpq variables)
+* **MySQL**: `MYSQL_HOST`, `MYSQL_TCP_PORT`, `MYSQL_USER`, `MYSQL_PWD`, `MYSQL_DATABASE`
+* **SQLite**: `SQLITE_DATABASE`
+
+Individual rake tasks:
+
+```
 $ rake test:unit
-$ rake test:integration:all
 $ rake test:integration:sqlite
 $ rake test:integration:postgresql
 $ rake test:integration:mysql
-
-# test different active model versions
-$ appraisal install
-$ appraisal rake
+$ rake test:integration:all
+$ rake                          # unit + all integration
 ```
+
+### Running against all supported Rails versions
+
+The test matrix covers Rails 4.2 through 8.0. Each Rails version requires a
+specific Ruby and bundler. Install dependencies first, then run the tests:
+
+```sh
+export PGHOST=/var/run/postgresql PGPORT=5432 PGUSER=postgres
+export MYSQL_USER=root
+
+# install
+RBENV_VERSION=2.6.10 BUNDLE_GEMFILE=gemfiles/rails_4.2.gemfile bundle _1.17.3_ install
+RBENV_VERSION=2.6.10 BUNDLE_GEMFILE=gemfiles/rails_5.2.gemfile bundle _1.17.3_ install
+RBENV_VERSION=2.7.8  BUNDLE_GEMFILE=gemfiles/rails_6.1.gemfile bundle _2.4.22_ install
+RBENV_VERSION=3.3.0  BUNDLE_GEMFILE=gemfiles/rails_7.0.gemfile bundle install
+RBENV_VERSION=3.3.0  BUNDLE_GEMFILE=gemfiles/rails_7.2.gemfile bundle install
+RBENV_VERSION=3.3.0  BUNDLE_GEMFILE=gemfiles/rails_8.0.gemfile bundle install
+
+# test
+RBENV_VERSION=2.6.10 BUNDLE_GEMFILE=gemfiles/rails_4.2.gemfile bundle _1.17.3_ exec rake
+RBENV_VERSION=2.6.10 BUNDLE_GEMFILE=gemfiles/rails_5.2.gemfile bundle _1.17.3_ exec rake
+RBENV_VERSION=2.7.8  BUNDLE_GEMFILE=gemfiles/rails_6.1.gemfile bundle _2.4.22_ exec rake
+RBENV_VERSION=3.3.0  BUNDLE_GEMFILE=gemfiles/rails_7.0.gemfile bundle exec rake
+RBENV_VERSION=3.3.0  BUNDLE_GEMFILE=gemfiles/rails_7.2.gemfile bundle exec rake
+RBENV_VERSION=3.3.0  BUNDLE_GEMFILE=gemfiles/rails_8.0.gemfile bundle exec rake
+```
+
+Coverage reports are generated to `coverage/` via simplecov.
 
 ## Problems
 
